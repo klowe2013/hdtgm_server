@@ -5,6 +5,13 @@ import json
 import numpy as np 
 from fuzzywuzzy import fuzz 
 import numpy as np 
+import redis 
+import time 
+
+# from constants import REDIS_IP, REDIS_PORT
+REDIS_IP, REDIS_PORT = 'localhost', 6379
+
+r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
 
 app = Flask(__name__)
 
@@ -64,8 +71,16 @@ def get_audio_by_id(id):
     
     print(f'pulling audio for id {id}')
 
-    with open(f"{BASE_DIR}/{all_filenames[id]}", 'rb') as f:
-        audio_data = base64.b64encode(f.read()).decode('UTF-8')
+    # Default to pull from Redis cache
+    start_time = time.time()
+    audio_data = r.get(f'audio_data:{id}')
+    if audio_data is None:
+        with open(f"{BASE_DIR}/{all_filenames[id]}", 'rb') as f:
+            audio_data = base64.b64encode(f.read()).decode('UTF-8')
+            print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+            r.set(f'audio_data:{id}', audio_data)
+    else:
+        print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
     data = {"snd": audio_data}
     res = app.response_class(response=json.dumps(data),
