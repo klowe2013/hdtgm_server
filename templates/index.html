@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        <h1> Hello from webserver!</h1>
+        <h2> 
+            Found {{ n_episodes }} HDTGM episodes available: 
+            {% for episode, ep_link in episodes.items() %}
+            <a href="{{ '/%s'%ep_link }}"><li>{{ episode }}</li></a>
+            {% endfor %}
+        </h2>
+    </body>
+
+    <audio controls></audio>
+    <script>
+        (async _ => {
+            const res = await fetch('/audio')
+            let {snd: b64buf} = await res.json()
+            document.querySelector('audio').src="data:audio/mp3;base64, "+b64buf;
+        })()
+    </script>
+</html>

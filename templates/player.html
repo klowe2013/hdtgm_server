@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        <div>
+            <div>
+                <audio controls id="audio_player"></audio>
+            </div>
+            <div>
+                <button id="back30" onclick="change_player_time(-30)">-30</button>
+                <button id="back15" onclick="change_player_time(-15)">-15</button>
+                <button id="plus30" onclick="change_player_time(30)">+30</button>
+                <button id="plus60" onclick="change_player_time(60)">+60</button>
+            </div>
+        </div>
+        <h2> Found {{ n_episodes }} HDTGM episodes available.</h2>
+        <div>
+            <div>
+                <select id="episode_selector">
+                    {% for episode_id, episode in episodes.items() %}
+                    <option value="{{episode_id}}">{{episode}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button id="change_button">Change Episode</button>
+            </div>
+        </div>
+    </body>
+
+    <script src="static/player_funs.js"></script>
+</html>
+
