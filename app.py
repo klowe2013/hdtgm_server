@@ -15,7 +15,8 @@ r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
 
 app = Flask(__name__)
 
-BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
+# BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
+BASE_DIR = '/hdtgm-player/media/audio_files/'
 
 all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
@@ -89,4 +90,4 @@ def get_audio_by_id(id):
     return res
 
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', debug=True)
