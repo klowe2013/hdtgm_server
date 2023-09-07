@@ -1,7 +1,9 @@
-const btn = document.getElementById("change_button");
+const change_btn = document.getElementById("change_button");
+const play_btn = document.getElementById("play")
 const ep_selector = document.getElementById("episode_selector");
 const player = document.getElementById('audio_player')
 const mp3_prefix = "data:audio/mp3;base64, "
+let audio_buffer = ""
 
 function delay(milliseconds){
     return new Promise(resolve => {
@@ -9,20 +11,20 @@ function delay(milliseconds){
     });
 }
 
-update_audio = async (episode_id) => {
-    player.src = mp3_prefix
-    
+load_audio = async (episode_id) => {
     let n_chunks = 1 // Eventually replace with some lookup logic from database
+    let full_audio = ""
+    console.log(`Loading episode id ${episode_id}`)
     for (i=0; i < n_chunks; i++){
         const res = await fetch(`/audio_by_id/${episode_id}`);
         let {snd: b64buf} = await res.json();
-        let is_paused = player.paused
-        console.log(`player is paused? ${is_paused}`)
-        append_audio_buf(b64buf)
-        player.paused = is_paused
-        console.log(`Updated and player is now: ${player.paused}`)
-        await delay(5000)
+        full_audio = `${full_audio}${b64buf}`
+        await delay(50)
     }
+    console.log(`Loaded episode id ${episode_id}`)
+    play_btn.value = 'Play/Pause'
+    player.src = `${mp3_prefix}${full_audio}`
+    return full_audio
 }
 
 append_audio_buf = (buf) => {
@@ -42,7 +44,19 @@ change_player_time = (delta_seconds) => {
     player.currentTime += delta_seconds
 }
 
-btn.addEventListener("click", function () {
+update_audio = async (episode_id) => {
+    play_btn.value = 'Loading...'
+    audio_buffer = await load_audio(episode_id)
+    play_btn.value = 'Play/Pause'
+}
+
+change_btn.addEventListener("click", function () {
+    console.log('received click for audio buffer')
     update_audio(ep_selector.value)
 });
+
+play_btn.addEventListener("click", function () {
+    console.log(`Playing audio src ${mp3_prefix}${audio_buffer}`)
+    let player = new Audio(`${mp3_prefix}${audio_buffer}`)
+})
 
