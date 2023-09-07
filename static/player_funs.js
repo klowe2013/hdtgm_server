@@ -18,12 +18,11 @@ load_audio = async (episode_id) => {
     for (i=0; i < n_chunks; i++){
         const res = await fetch(`/audio_by_id/${episode_id}`);
         let {snd: b64buf} = await res.json();
-        full_audio = `${full_audio}${b64buf}`
+        full_audio = append_audio_buf(b64buf)
         await delay(50)
     }
     console.log(`Loaded episode id ${episode_id}`)
     play_btn.value = 'Play/Pause'
-    player.src = `${mp3_prefix}${full_audio}`
     return full_audio
 }
 
@@ -33,6 +32,7 @@ append_audio_buf = (buf) => {
     let curr_time = player.currentTime
     player.src = mp3_prefix+new_buf;
     player.currentTime = curr_time
+    return new_buf
 }
 
 check_player_time = () => {
@@ -44,10 +44,16 @@ change_player_time = (delta_seconds) => {
     player.currentTime += delta_seconds
 }
 
-update_audio = async (episode_id) => {
-    play_btn.value = 'Loading...'
-    audio_buffer = await load_audio(episode_id)
-    play_btn.value = 'Play/Pause'
+update_audio = (episode_id) => {
+    console.log('entering update_audio')
+    play_btn.innerHTML = 'Loading...'
+    load_audio(episode_id).then(
+        (res) => {
+            let audio_buffer = res
+            player.src = `${mp3_prefix}${audio_buffer}`
+            play_btn.innerHTML = 'Play/Pause'
+        }
+    )    
 }
 
 change_btn.addEventListener("click", function () {

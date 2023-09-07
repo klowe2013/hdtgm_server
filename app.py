@@ -16,8 +16,8 @@ REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
 
 app = Flask(__name__)
 
-# BASE_DIR = '/hdtgm-player/media/audio_files/'
-BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
+BASE_DIR = '/hdtgm-player/media/audio_files/'
+# BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
 
 all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
@@ -91,7 +91,7 @@ def get_audio_by_id(id):
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
-    data = {"snd": audio_data}
+    data = {"snd": audio_data[:100000]}
     res = app.response_class(response=json.dumps(data),
         status=200,
         mimetype='application/json')
