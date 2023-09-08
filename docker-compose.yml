@@ -1,0 +1,41 @@
+version: '3' # 2.4 is the last version that supports depends_on conditions for service health
+
+networks:
+  redis:  # docker network where all cassandra nodes will be put in
+services:
+  redis:
+    image: redis   # better to use a specific version, if you want to control upgrades
+    container_name: redis-server-compose
+    hostname: redis
+    mem_limit: 2g  # It's not strictly required, but it's better to have some memory limit
+    healthcheck:
+        test: ["CMD", "ls" ]
+        interval: 5s
+        timeout: 5s
+        retries: 60
+    networks:
+      - redis
+    ports:
+      - "6379:6379"  # Expose native binary CQL port for your apps
+    environment:
+        FOO: "bar"
+  hdtgm-player:
+    image: hdtgm-player
+    container_name: hdtgm-player-compose
+    hostname: player
+    mem_limit: 2g
+    healthcheck:
+        test: ["CMD", "ls" ]
+        interval: 5s
+        timeout: 5s
+        retries: 60
+    networks:
+      - redis
+    ports:
+      - "5000:5000"  # Expose native Flask port for your apps
+    environment: 
+        REDIS_IP: "redis"
+    depends_on:
+      redis:    # start Flask app only after redis is healthy
+        condition: service_healthy
+  

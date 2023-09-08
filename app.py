@@ -12,7 +12,7 @@ import os
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
 
-# r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
+r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
 
 app = Flask(__name__)
 
@@ -98,4 +98,4 @@ def get_audio_by_id(id):
     return res
 
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', debug=True)
