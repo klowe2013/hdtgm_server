@@ -12,7 +12,7 @@ import os
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
 
-r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
+r = 1#redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
 
 app = Flask(__name__)
 
@@ -25,7 +25,7 @@ all_titles = [f.replace('_', '') for f in all_filenames]
     
 @app.route('/')
 def index():
-    return redirect('/player')
+    return redirect('/search')
 
 @app.route('/player')
 def player():
@@ -91,7 +91,7 @@ def get_audio_by_id(id):
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
-    data = {"snd": audio_data[:100000]}
+    data = {"snd": audio_data}
     res = app.response_class(response=json.dumps(data),
         status=200,
         mimetype='application/json')
