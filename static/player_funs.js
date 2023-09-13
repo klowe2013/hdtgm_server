@@ -12,14 +12,41 @@ function delay(milliseconds){
 }
 
 load_audio = async (episode_id) => {
-    let n_chunks = 1 // Eventually replace with some lookup logic from database
+    let n_chunks = 2 // Eventually replace with some lookup logic from database
     let full_audio = ""
     console.log(`Loading episode id ${episode_id}`)
     for (i=0; i < n_chunks; i++){
-        const res = await fetch(`/audio_by_id/${episode_id}`);
-        let {snd: b64buf} = await res.json();
-        full_audio = append_audio_buf(b64buf)
-        await delay(50)
+        console.log(`starting loop ${i}`)
+        // const res = await fetch(`/audio_by_id/${episode_id}`);
+        // let {snd: b64buf} = await res.json();
+        // full_audio = append_audio_buf(b64buf)
+        // await delay(50)
+        fetch_uri = `/audio_by_id/${episode_id}`
+        console.log(`fetching from ${fetch_uri}`)
+        fetch(`/audio_by_id/${episode_id}`).then(
+            (res) => {
+                res.json().then(
+                    (res) => {
+                        let {snd: b64buf} = res
+                        console.log(`chunk length is ${b64buf.length}`)
+                        if (i==0) {
+                            player.src = `${mp3_prefix}${b64buf}`
+                            full_audio = full_audio + b64buf
+                        } else {
+                            // let curr_buf = player.src.substring(mp3_prefix.length)
+                            // let new_buf = curr_buf + b64buf
+                            // player.src = mp3_prefix+new_buf;
+                            let curr_time = player.currentTime
+                            player.src = player.src + b64buf
+                            player.currentTime = curr_time
+                            full_audio = full_audio + b64buf
+                        }
+                        console.log(`after i=${i} player src length is ${player.src.length}`)
+                    }
+                )
+            }
+        )
+        await delay(2000)
     }
     console.log(`Loaded episode id ${episode_id}`)
     play_btn.value = 'Play/Pause'
@@ -48,10 +75,12 @@ update_audio = (episode_id) => {
     console.log('entering update_audio')
     play_btn.innerHTML = 'Loading...'
     load_audio(episode_id).then(
-        (res) => {
-            let audio_buffer = res
-            player.src = `${mp3_prefix}${audio_buffer}`
+        (full_audio) => {
+            // let audio_buffer = res
+            let save_time = check_player_time()
+            player.src = `${mp3_prefix}${full_audio}`
             play_btn.innerHTML = 'Play/Pause'
+            player.currentTime = save_time
         }
     )    
 }

@@ -92,7 +92,7 @@ def get_audio_by_id(id):
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
-    data = {"snd": audio_data}
+    data = {"snd": audio_data[:1000000]}
     res = app.response_class(response=json.dumps(data),
         status=200,
         mimetype='application/json')
