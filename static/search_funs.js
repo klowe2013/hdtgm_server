@@ -16,7 +16,7 @@ function removeOptions(selectElement) {
     }
  }
 
-search_btn = document.getElementById("search_btn")
+search_btn = document.getElementById("search-btn")
 search_text = document.getElementById("search_text")
 episode_selector = document.getElementById("episode_selector")
 n_episodes = document.getElementById("n_episodes")

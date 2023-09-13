@@ -2,12 +2,14 @@
     <head>
         <title>{{ title }}</title>
     </head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
     <body>
+        <h2> Now it's time for...</h2>
         <div>
             <div>
                 <audio controls id="audio_player"></audio>
             </div>
-            <div>
+            <div id="play-btns-container">
                 <button id="back30" onclick="change_player_time(-30)">-30</button>
                 <button id="back15" onclick="change_player_time(-15)">-15</button>
                 <button id="play">Play/Pause</button>
@@ -15,18 +17,15 @@
                 <button id="plus60" onclick="change_player_time(60)">+60</button>
             </div>
         </div>
+        <h2>How Did This Get Made!</h2>
         <div>
-            <h2> Found {{ n_episodes }} HDTGM episodes available.</h2>
-            <div>
+            <div id="search-container">
                 <label for="search_text">Search Episodes:</label>
                 <input type="text" id="search_text" size="20"/>
+                <input type="number" id="n_episodes" size="10" value="5">
             </div>
-            <div>
-                <label for="n_episodes">How many episodes?</label>
-                <input type="number" id="n_episodes" size="20" value="5">
-            </div>
-            <div>
-                <button id="search_btn">Search</button>
+            <div id="search-btn-container">
+                <button id="search-btn">Search</button>
             </div>
         </div>
         <div>
@@ -41,6 +40,7 @@
                 <button id="change_button">Change Episode</button>
             </div>
         </div>
+            
     </body>
 
     <script src="static/search_funs.js"></script>
