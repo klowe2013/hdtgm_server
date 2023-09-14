@@ -12,8 +12,11 @@ import os
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
 
-r = 1#redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
-
+r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
+try: 
+    r.set('up_check', 'up')
+except:
+    r = 1
 app = Flask(__name__)
 
 # BASE_DIR = '/hdtgm-player/media/audio_files/'
@@ -76,19 +79,18 @@ def get_audio_by_id(id):
 
     # Default to pull from Redis cache
     start_time = time.time()
-    try:
+    if hasattr(r, 'set'):
+        # Get audio data, or return None if not in redis
         audio_data = r.get(f'audio_data:{id}')
-    except:
+    else:
+        # Default to None for next conditional check
         audio_data = None 
 
     if audio_data is None:
         with open(f"{BASE_DIR}/{all_filenames[id]}", 'rb') as f:
             audio_data = base64.b64encode(f.read()).decode('UTF-8')
             print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
-            try: 
-                r.set(f'audio_data:{id}', audio_data)
-            except:
-                pass
+            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
