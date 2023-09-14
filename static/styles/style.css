@@ -32,6 +32,7 @@ body {
 
 audio {
   width: 400px;
+  /* width: 80% */
 }
 
 #episode_selector {
