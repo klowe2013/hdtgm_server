@@ -21,7 +21,8 @@ app = Flask(__name__)
 
 # BASE_DIR = '/hdtgm-player/media/audio_files/'
 # BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
-BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
+# BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
+BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
 
 all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
