@@ -12,7 +12,7 @@ import os
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
 
-r = redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
+r = 1 #redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
 try: 
     r.set('up_check', 'up')
 except:
