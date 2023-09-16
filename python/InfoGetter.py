@@ -70,11 +70,14 @@ class InfoGetter:
     def ingest(self):
         message = self.consumer.poll(1.0)
         while message is not None:
-            data = message.value 
+            data = message 
+            print(data)
+            message = self.consumer.poll(1.0)
+            print(message)
 
-            # Get title and episode number
-            title = self.parse_title(data['filename'])
-            episode_no = self.get_episode_no(data['filename'])
+            # # Get title and episode number
+            # title = self.parse_title(data['filename'])
+            # episode_no = self.get_episode_no(data['filename'])
 
-            # Get IMDB Info
-            imdb_info = self._search_title(self.imdb, title)
+            # # Get IMDB Info
+            # imdb_info = self._search_title(self.imdb, title)
