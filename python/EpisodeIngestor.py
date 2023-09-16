@@ -12,8 +12,11 @@ class EpisodeIngestor:
     TABLE = 'audio_binary'
     def __init__(self, episode_name):
         self.episode_name = episode_name 
-        self.producer = KafkaProducer(bootstrap_servers=['kafka1:19092', 'kafka2:19093', 'kafka3:19094'])
-        self.writer = CassandraWriter(self.KEYSPACE, self.TABLE)
+        self.producer = KafkaProducer(
+            bootstrap_servers='localhost:9092', 
+            value_serializer=lambda x: json.dumps(x).encode('utf-8')
+        )
+
 
     def _get_binary(self):
         with open(f"{self.media_dir}/{self.episode_name}", 'rb') as f:
@@ -26,7 +29,7 @@ class EpisodeIngestor:
             'filename': self.episode_name,
         }
 
-        self.producer.send("random_names", json.dumps(kafka_data).encode('utf-8'))
+        self.producer.send("uploaded_files", kafka_data)
     
     def ingest(self):
         # Get title, episode number, ID
@@ -40,10 +43,4 @@ class EpisodeIngestor:
 
         # Publish ID and filename to Kafka topic for batch IMDB parsing
         self.publish_kafka(internal_id)
-
-        # Get title and episode number
-        title = self.parse_title(self.episode_name)
-        episode_no = self.get_episode_no(self.episode_name)
-
-        # Get IMDB Info
-        imdb_info = self._search_title()
+        

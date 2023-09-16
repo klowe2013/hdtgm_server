@@ -1,11 +1,20 @@
 from imdb import Cinemagoer 
 import re 
+import json 
+from kafka import KafkaConsumer 
 
 class InfoGetter:
 
     def __init__(self):
         self.imdb = Cinemagoer()
         self.imdb_info = {}
+        self.consumer = KafkaConsumer('test_new_topic',
+            bootstrap_servers=['localhost:9092'],
+            auto_offset_reset='earliest',
+            enable_auto_commit=True,
+            group_id='my-group',
+            value_deserializer=lambda x: json.loads(x.decode('utf-8'))
+        )
 
     @staticmethod
     def parse_title(filename):
@@ -28,14 +37,14 @@ class InfoGetter:
         episode_no = re.search('(^([0-9]+))', filename).group(0)
         return episode_no
     
-    def _search_title(self):
-        title_str = self.parse_title(self.episode_name)
-
-        search_results = self.imdb.search_movie(title_str.strip())
+    @staticmethod
+    def _search_title(imdb, title_str):
+        
+        search_results = imdb.search_movie(title_str.strip())
     
         check_ind, found_movie = 0, False
         while check_ind < len(search_results) and not found_movie:
-            first_movie = self.imdb.get_movie(search_results[check_ind].getID())    
+            first_movie = imdb.get_movie(search_results[check_ind].getID())    
             if 'plot' in first_movie.keys():
                 found_movie = True
             else:
@@ -56,6 +65,16 @@ class InfoGetter:
                 'year': first_movie['year'],
                 'cast': cast
             }
-        self.imdb_info = imdb_info
         return imdb_info 
     
+    def ingest(self):
+        message = self.consumer.poll(1.0)
+        while message is not None:
+            data = message.value 
+
+            # Get title and episode number
+            title = self.parse_title(data['filename'])
+            episode_no = self.get_episode_no(data['filename'])
+
+            # Get IMDB Info
+            imdb_info = self._search_title(self.imdb, title)

@@ -1,4 +1,4 @@
-#!/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/hdtgm_server/bin/python
+#!/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/hdtgm_server/bin/python3
 # -*- coding: utf-8 -*-
 """
 get_top_bottom_movies.py
