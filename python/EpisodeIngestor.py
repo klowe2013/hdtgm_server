@@ -3,6 +3,7 @@ import re
 from imdb import Cinemagoer 
 import uuid 
 from kafka import KafkaProducer 
+import json 
 from ..python.CassandraWriter import CassandraWriter 
 
 class EpisodeIngestor:
