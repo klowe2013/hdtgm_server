@@ -9,3 +9,9 @@ build-app:
 
 run-app:
 	docker run -d -p 80:5000 --name hdtgm-player hdtgm-player 
+
+compose-kafka:
+	docker-compose --file ./dockerfiles/docker-compose-kafka.yml up -d
+
+compose-cassandra:
+	docker-compose --file ./dockerfiles/docker-compose-cassandra.yml up -d

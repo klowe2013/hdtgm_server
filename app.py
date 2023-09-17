@@ -9,6 +9,7 @@ import numpy as np
 import redis 
 import time 
 import os 
+from python.EpisodeIngestor import EpisodeIngestor
 
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
@@ -28,6 +29,8 @@ BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
 all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
 all_titles = [f.replace('_', '') for f in all_filenames]
+
+ingestor = EpisodeIngestor()
     
 @app.route('/')
 def index():
@@ -109,15 +112,17 @@ def episode_upload():
     for uploaded_file in uploaded_files:
         filename = secure_filename(uploaded_file.filename)
         uploaded_file.save(os.path.join(upload_folder, filename))
-        with open(os.path.join(upload_folder, filename), 'rb') as f:
-            audio_data = base64.b64encode(f.read(100)).decode('UTF-8')
-        import uuid 
-        file_data = {
-            'id': uuid.uuid4(),
-            'filename': filename,
-            'data': audio_data
-        }
-        print(file_data)
+        ingestor.ingest(filename)
+        # with open(os.path.join(upload_folder, filename), 'rb') as f:
+        #     audio_data = base64.b64encode(f.read(100)).decode('UTF-8')
+        # import uuid 
+        # file_data = {
+        #     'id': uuid.uuid4(),
+        #     'filename': filename,
+        #     'data': audio_data
+        # }
+        # print(file_data)
+
     
     return '1'
 
