@@ -32,3 +32,19 @@ search_btn.addEventListener("click", async () => {
         episode_selector.add(option)
     }
 });
+
+const form = document.querySelector('form');
+form.addEventListener('submit', handleUpload);
+function handleUpload(event) {
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const fetchOptions = {
+        method: form.method,
+        body: formData    
+    };
+
+    fetch('/episode_upload', fetchOptions);
+  
+    event.preventDefault();
+  }

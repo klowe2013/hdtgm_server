@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect
+from werkzeug.utils import secure_filename
 import base64 
 import glob 
 import json 
@@ -21,8 +22,8 @@ app = Flask(__name__)
 
 # BASE_DIR = '/hdtgm-player/media/audio_files/'
 # BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
-# BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
-BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
+BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
+# BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
 
 all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
@@ -100,6 +101,25 @@ def get_audio_by_id(id):
         status=200,
         mimetype='application/json')
     return res
+
+@app.route('/episode_upload', methods=['GET', 'POST'])
+def episode_upload():
+    upload_folder = './media/audio_files'
+    uploaded_files = request.files.getlist('file')
+    for uploaded_file in uploaded_files:
+        filename = secure_filename(uploaded_file.filename)
+        uploaded_file.save(os.path.join(upload_folder, filename))
+        with open(os.path.join(upload_folder, filename), 'rb') as f:
+            audio_data = base64.b64encode(f.read(100)).decode('UTF-8')
+        import uuid 
+        file_data = {
+            'id': uuid.uuid4(),
+            'filename': filename,
+            'data': audio_data
+        }
+        print(file_data)
+    
+    return '1'
 
 if __name__=='__main__':
     app.run(host='0.0.0.0', debug=True)
