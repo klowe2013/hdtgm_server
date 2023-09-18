@@ -15,3 +15,9 @@ compose-kafka:
 
 compose-cassandra:
 	docker-compose --file ./dockerfiles/docker-compose-cassandra.yml up -d
+
+kafka-down:
+	docker-compose --file ./dockerfiles/docker-compose-kafka.yml down
+
+cassandra-down:
+	docker-compose --file ./dockerfiles/docker-compose-cassandra.yml down

@@ -110,6 +110,7 @@ def episode_upload():
     upload_folder = './media/audio_files'
     uploaded_files = request.files.getlist('file')
     for uploaded_file in uploaded_files:
+        print(f'Ingesting {uploaded_file.filename}')
         filename = secure_filename(uploaded_file.filename)
         uploaded_file.save(os.path.join(upload_folder, filename))
         ingestor.ingest(filename)
