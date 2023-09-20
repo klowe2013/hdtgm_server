@@ -30,7 +30,10 @@ all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
 all_titles = [f.replace('_', '') for f in all_filenames]
 
-# ingestor = EpisodeIngestor()
+try:
+    ingestor = EpisodeIngestor()
+except:
+    ingestor = None 
     
 @app.route('/')
 def index():
@@ -115,7 +118,8 @@ def episode_upload():
         uploaded_file.save(os.path.join(upload_folder, filename))
         # TODO: store to GCP bucket
         # TODO: add IMDB info to Cassandra ingestion
-        ingestor.ingest(filename)
+        if ingestor is not None:
+            ingestor.ingest(filename)
         # with open(os.path.join(upload_folder, filename), 'rb') as f:
         #     audio_data = base64.b64encode(f.read(100)).decode('UTF-8')
         # import uuid 
