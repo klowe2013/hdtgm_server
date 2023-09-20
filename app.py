@@ -9,7 +9,7 @@ import numpy as np
 import redis 
 import time 
 import os 
-from python.EpisodeIngestor import EpisodeIngestor
+# from python.EpisodeIngestor import EpisodeIngestor
 
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
@@ -30,7 +30,7 @@ all_files = glob.glob(f'{BASE_DIR}/*')
 all_filenames = sorted([f.split('/')[-1] for f in all_files])
 all_titles = [f.replace('_', '') for f in all_filenames]
 
-ingestor = EpisodeIngestor()
+# ingestor = EpisodeIngestor()
     
 @app.route('/')
 def index():
