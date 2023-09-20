@@ -113,6 +113,8 @@ def episode_upload():
         print(f'Ingesting {uploaded_file.filename}')
         filename = secure_filename(uploaded_file.filename)
         uploaded_file.save(os.path.join(upload_folder, filename))
+        # TODO: store to GCP bucket
+        # TODO: add IMDB info to Cassandra ingestion
         ingestor.ingest(filename)
         # with open(os.path.join(upload_folder, filename), 'rb') as f:
         #     audio_data = base64.b64encode(f.read(100)).decode('UTF-8')
