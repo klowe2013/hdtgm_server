@@ -3,29 +3,28 @@ import re
 from imdb import Cinemagoer 
 import uuid 
 import json 
-from python.CassandraInterface import CassandraInterface 
+from python.db_interfaces.DatabaseFactory import DatabaseFactory 
+from python.constants import SQLITE_EPISODE_SCHEMA
 
 class EpisodeIngestor:
     media_dir = './media/audio_files/'
-    KEYSPACE = 'hdtgm_episodes'
-    TABLE = 'audio_binary'
-    # TODO: update CASS_SCHEMA with new IMDB info
-    CASS_SCHEMA = '(id text, filename text, binary text, PRIMARY KEY (id))'
+    DATBASE = 'hdtgm_episodes.db'
+    TABLE = 'episode_info'
         
     def __init__(self):
         self.episode_name = ''
-        self.cassandra = CassandraInterface(self.KEYSPACE)
+        self.database = DatabaseFactory('sqlite')(self.DATABASE)
         self.imdb = Cinemagoer()
         self.imdb_info = {}
 
-    def _write_cassandra(self, data):
-        print(f'Writing ID {data["id"]} ({data["filename"]}) to Cassandra')
+    def _write_entry(self, data):
+        print(f'Writing ID {data["id"]} ({data["filename"]}) to DB')
         
-        rows = self.cassandra.write_cassandra(data, self.TABLE)
+        rows = self.database.write_entry(data, self.TABLE)
         return rows 
     
-    def _create_cassandra(self):
-        self.cassandra.create_table(self.TABLE, self.CASS_SCHEMA)
+    def _create_table(self):
+        self.database.create_table(self.TABLE, SQLITE_EPISODE_SCHEMA)
 
     @staticmethod
     def parse_title(filename):
@@ -97,12 +96,16 @@ class EpisodeIngestor:
             'title': title,
             'episode_no': episode_no
         }
+
+        # Add IMDB Info
         for k, v in imdb_info.items():
             all_info[k] = v
+        all_info['genre'] = ', '.join(imdb_info['genre'])
+        all_info['cast'] = ', '.join(imdb_info['cast'])
 
         # Write audio data to Cassandra
         if initialize:
-            self._create_cassandra()
-        self._write_cassandra(all_info)
+            self._create_table()
+        self._write_entry(all_info)
 
         

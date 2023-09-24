@@ -45,18 +45,16 @@ except:
 def index():
     return redirect('/search')
 
-@app.route('/list-episodes')
 def list_episodes():
     blobs = client.list_blobs(BASE_BUCKET)
     all_filenames = sorted([blob.name for blob in blobs])
     # all_titles = [f.replace('_', '') for f in all_filenames]
-    return json.dumps({'filename_list': all_filenames})
+    return all_filenames
 
 @app.route('/player')
 def player():
     template_data = {
         'title': 'HDTGM Episode Player',
-        'n_episodes': len(all_filenames),
         'episodes': {ie: episode for ie, episode in enumerate(all_titles)}
     }
     return render_template('player.html', **template_data)
@@ -65,7 +63,6 @@ def player():
 def search_page():
     template_data = {
         'title': 'HDTGM Episode Lookup',
-        'n_episodes': len(all_filenames),
         'episodes': {}
     }
     return render_template('search_page.html', **template_data)
