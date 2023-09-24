@@ -4,16 +4,16 @@ from imdb import Cinemagoer
 import uuid 
 import json 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory 
-from python.constants import SQLITE_EPISODE_SCHEMA
+from python.constants import SQLITE_EPISODE_SCHEMA, SQLITE_DB, EPISODE_INFO
 
 class EpisodeIngestor:
     media_dir = './media/audio_files/'
-    DATBASE = 'hdtgm_episodes.db'
-    TABLE = 'episode_info'
+    DATABASE = SQLITE_DB
+    TABLE = EPISODE_INFO
         
     def __init__(self):
         self.episode_name = ''
-        self.database = DatabaseFactory('sqlite')(self.DATABASE)
+        self.database = DatabaseFactory(self.DATABASE).create('sqlite')
         self.imdb = Cinemagoer()
         self.imdb_info = {}
 
@@ -33,7 +33,7 @@ class EpisodeIngestor:
         title_str = filename
         if ')' not in title_str and '(' in title_str:
             title_str = title_str.replace('.mp3', ').mp3')
-
+        
         # Remove everything up to first letter
         title_str = re.sub('^[^A-Za-z]+', '', title_str)
         title_str = re.sub('\([^)]*\)', '', title_str)
@@ -51,7 +51,7 @@ class EpisodeIngestor:
     def _search_title(imdb, title_str):
         
         search_results = imdb.search_movie(title_str.strip())
-    
+        
         check_ind, found_movie = 0, False
         while check_ind < len(search_results) and not found_movie:
             first_movie = imdb.get_movie(search_results[check_ind].getID())    
@@ -70,7 +70,7 @@ class EpisodeIngestor:
             imdb_info = {
                 'imdb_title': first_movie['title'],
                 'genres': first_movie['genres'],
-                'description': first_movie['plot outline'] if 'plot outline' in first_movie.keys() else first_movie['plot'],
+                'description': first_movie['plot outline'] if 'plot outline' in first_movie.keys() else first_movie['plot'][0],
                 'rating': first_movie.get('rating', -1),
                 'year': first_movie['year'],
                 'cast': cast
@@ -87,8 +87,11 @@ class EpisodeIngestor:
         title = self.parse_title(episode_name)
         episode_no = self.get_episode_no(episode_name)
 
+        print(f'parsed episode {episode_name} into episode #{episode_no}: {title}')
+
         # Get IMDB Info
         imdb_info = self._search_title(self.imdb, title)
+        print(imdb_info)
 
         all_info = {
             'id': internal_id,
@@ -100,7 +103,7 @@ class EpisodeIngestor:
         # Add IMDB Info
         for k, v in imdb_info.items():
             all_info[k] = v
-        all_info['genre'] = ', '.join(imdb_info['genre'])
+        all_info['genres'] = ', '.join(imdb_info['genres'])
         all_info['cast'] = ', '.join(imdb_info['cast'])
 
         # Write audio data to Cassandra

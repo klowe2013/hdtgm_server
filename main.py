@@ -10,8 +10,11 @@ import redis
 import time 
 import os 
 from python.EpisodeIngestor import EpisodeIngestor
+from python.db_interfaces.DatabaseFactory import DatabaseFactory
+from python.constants import SQLITE_DB, EPISODE_INFO
 from google.cloud import storage 
 import requests 
+import uuid 
 
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
@@ -36,23 +39,25 @@ BASE_BUCKET = 'hdtgm-episodes'
 client = storage.Client(project='hdtgm-player')
 bucket = client.bucket(BASE_BUCKET)
 
-try:
-    ingestor = EpisodeIngestor()
-except:
-    ingestor = None 
+database = DatabaseFactory(SQLITE_DB).create('sqlite')
     
 @app.route('/')
 def index():
     return redirect('/search')
 
-def list_episodes():
-    blobs = client.list_blobs(BASE_BUCKET)
-    all_filenames = sorted([blob.name for blob in blobs])
-    # all_titles = [f.replace('_', '') for f in all_filenames]
+def get_all_titles():
+    # blobs = client.list_blobs(BASE_BUCKET)
+    # all_filenames = sorted([blob.name for blob in blobs])
+    # # all_titles = [f.replace('_', '') for f in all_filenames]
+    all_filenames = [
+        str(v) 
+        for v in database.query(f'select distinct(imdb_title) from {EPISODE_INFO}')['IMDB_TITLE'].values
+    ]
     return all_filenames
 
 @app.route('/player')
 def player():
+    all_titles = get_all_titles()
     template_data = {
         'title': 'HDTGM Episode Player',
         'episodes': {ie: episode for ie, episode in enumerate(all_titles)}
@@ -78,6 +83,7 @@ def search_text():
     search_text = request_params.get('search_text', '')
     n_results = int(request_params.get('n_results', '5'))
 
+    all_titles = get_all_titles()
     fuzzy_match_ratios = np.array([fuzz.partial_ratio(search_text, f) for f in all_titles])
     match_inds = np.argsort(fuzzy_match_ratios)[::-1]
     search_data = {
@@ -111,9 +117,9 @@ def get_audio_by_id(id):
         #     if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
         audio_blob = bucket.blob(f"{all_filenames[id]}")
         with audio_blob.open('rb') as f:
-                audio_data = base64.b64encode(f.read()).decode('UTF-8')
-                print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
-                if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
+            audio_data = base64.b64encode(f.read()).decode('UTF-8')
+            print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
@@ -125,44 +131,27 @@ def get_audio_by_id(id):
 
 @app.route('/episode_upload', methods=['GET', 'POST'])
 def episode_upload():
+    ingestor = EpisodeIngestor()
+    
     upload_folder = './media/audio_files'
     uploaded_files = request.files.getlist('file')
     for uploaded_file in uploaded_files:
-        print(f'Ingesting {uploaded_file.filename}')
         filename = secure_filename(uploaded_file.filename)
-        print('writing locally')
         uploaded_file.save(os.path.join(upload_folder, filename))
+
+        # Get title, episode number, ID
+        internal_id = str(uuid.uuid4())
+        # TODO: Write table ID -> storage location
+        
         # TODO: store to GCP bucket
-        blob = bucket.blob(uploaded_file.filename)
-        print('uploading to GCP')
-        blob.upload_from_filename(os.path.join(upload_folder, filename))
-        # with open(os.path.join(upload_folder, filename), 'rb') as f:
-        #     print('reading locally')
-        #     file_data = f.read()
-        # with blob.open('wb') as f:
-        #     print('writting to GCP')
-        #     f.write(file_data)
-        print('cleaning up')
-        os.remove(os.path.join(upload_folder, filename))
+        # blob = bucket.blob(uploaded_file.filename)
+        # print('uploading to GCP')
+        # blob.upload_from_filename(os.path.join(upload_folder, filename))
+        # os.remove(os.path.join(upload_folder, filename))
 
-        blobs = client.list_blobs(BASE_BUCKET)
-        all_filenames = sorted([blob.name for blob in blobs])
-        all_titles = [f.replace('_', '') for f in all_filenames]
-
-
-        # TODO: add IMDB info to Cassandra ingestion
+        # Add IMDB Info
         if ingestor is not None:
-            ingestor.ingest(filename)
-        # with open(os.path.join(upload_folder, filename), 'rb') as f:
-        #     audio_data = base64.b64encode(f.read(100)).decode('UTF-8')
-        # import uuid 
-        # file_data = {
-        #     'id': uuid.uuid4(),
-        #     'filename': filename,
-        #     'data': audio_data
-        # }
-        # print(file_data)
-
+            ingestor.ingest(internal_id, uploaded_file.filename)
     
     return '1'
 
