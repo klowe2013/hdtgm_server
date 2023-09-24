@@ -10,6 +10,8 @@ import redis
 import time 
 import os 
 from python.EpisodeIngestor import EpisodeIngestor
+from google.cloud import storage 
+import requests 
 
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
@@ -24,26 +26,37 @@ app = Flask(__name__)
 # BASE_DIR = '/hdtgm-player/media/audio_files/'
 # BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
 # BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
-BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
+# BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
+# all_files = glob.glob(f'{BASE_DIR}/*')
+# all_filenames = sorted([f.split('/')[-1] for f in all_files])
+# all_titles = [f.replace('_', '') for f in all_filenames]
 
-all_files = glob.glob(f'{BASE_DIR}/*')
-all_filenames = sorted([f.split('/')[-1] for f in all_files])
-all_titles = [f.replace('_', '') for f in all_filenames]
+global bucket, blobs, all_filenames, all_titles
+BASE_BUCKET = 'hdtgm-episodes'
+client = storage.Client(project='hdtgm-player')
+bucket = client.bucket(BASE_BUCKET)
 
-# try:
-ingestor = EpisodeIngestor()
-# except:
-#     ingestor = None 
+try:
+    ingestor = EpisodeIngestor()
+except:
+    ingestor = None 
     
 @app.route('/')
 def index():
     return redirect('/search')
 
+@app.route('/list-episodes')
+def list_episodes():
+    blobs = client.list_blobs(BASE_BUCKET)
+    all_filenames = sorted([blob.name for blob in blobs])
+    # all_titles = [f.replace('_', '') for f in all_filenames]
+    return json.dumps({'filename_list': all_filenames})
+
 @app.route('/player')
 def player():
     template_data = {
         'title': 'HDTGM Episode Player',
-        'n_episodes': len(all_files),
+        'n_episodes': len(all_filenames),
         'episodes': {ie: episode for ie, episode in enumerate(all_titles)}
     }
     return render_template('player.html', **template_data)
@@ -52,7 +65,7 @@ def player():
 def search_page():
     template_data = {
         'title': 'HDTGM Episode Lookup',
-        'n_episodes': len(all_files),
+        'n_episodes': len(all_filenames),
         'episodes': {}
     }
     return render_template('search_page.html', **template_data)
@@ -95,10 +108,15 @@ def get_audio_by_id(id):
         audio_data = None 
 
     if audio_data is None:
-        with open(f"{BASE_DIR}/{all_filenames[id]}", 'rb') as f:
-            audio_data = base64.b64encode(f.read()).decode('UTF-8')
-            print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
-            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
+        # with open(f"{BASE_DIR}/{all_filenames[id]}", 'rb') as f:
+        #     audio_data = base64.b64encode(f.read()).decode('UTF-8')
+        #     print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+        #     if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
+        audio_blob = bucket.blob(f"{all_filenames[id]}")
+        with audio_blob.open('rb') as f:
+                audio_data = base64.b64encode(f.read()).decode('UTF-8')
+                print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+                if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
@@ -115,8 +133,26 @@ def episode_upload():
     for uploaded_file in uploaded_files:
         print(f'Ingesting {uploaded_file.filename}')
         filename = secure_filename(uploaded_file.filename)
+        print('writing locally')
         uploaded_file.save(os.path.join(upload_folder, filename))
         # TODO: store to GCP bucket
+        blob = bucket.blob(uploaded_file.filename)
+        print('uploading to GCP')
+        blob.upload_from_filename(os.path.join(upload_folder, filename))
+        # with open(os.path.join(upload_folder, filename), 'rb') as f:
+        #     print('reading locally')
+        #     file_data = f.read()
+        # with blob.open('wb') as f:
+        #     print('writting to GCP')
+        #     f.write(file_data)
+        print('cleaning up')
+        os.remove(os.path.join(upload_folder, filename))
+
+        blobs = client.list_blobs(BASE_BUCKET)
+        all_filenames = sorted([blob.name for blob in blobs])
+        all_titles = [f.replace('_', '') for f in all_filenames]
+
+
         # TODO: add IMDB info to Cassandra ingestion
         if ingestor is not None:
             ingestor.ingest(filename)

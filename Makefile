@@ -21,3 +21,6 @@ kafka-down:
 
 cassandra-down:
 	docker-compose --file ./dockerfiles/docker-compose-cassandra.yml down
+
+deploy-gcp:
+	gcloud app deploy 
