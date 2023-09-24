@@ -1,0 +1,17 @@
+CASSANDRA_FILE_SCHEMA = '(id text, filename text, binary text, PRIMARY KEY (id))'
+SQLITE_EPISODE_SCHEMA = """
+(FILENAME    TEXT    PRIMARY KEY    NOT NULL,
+ID     TEXT    NOT NULL, 
+EPISODE_NO  INT NOT NULL,
+TITLE   TEXT    NOT NULL,
+IMDB_TITLE  TEXT,
+YEAR    INT,
+DESCRIPTION TEXT,
+RATING  REAL,
+GENRES   TEXT,
+CAST    TEXT
+)
+"""
+
+SQLITE_DB = 'hdtgm_test_database.db'
+EPISODE_INFO = 'episode_info_test'
