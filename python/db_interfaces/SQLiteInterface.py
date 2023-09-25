@@ -30,11 +30,14 @@ class SQLiteInterface:
         VALUES {tuple([v for k, v in data.items()])};
         """
         )
-        with sqlite3.connect(self.database) as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute(q)
-            conn.commit()
-    
+        try:
+            with sqlite3.connect(self.database) as conn:
+                cursor = conn.cursor()
+                rows = cursor.execute(q)
+                conn.commit()
+        except sqlite3.IntegrityError as e:
+            # UNIQUE constraint failed: episode_info.FILENAME
+            print(f'Error writing to db: {e}')    
         return rows 
     
     def query(self, query):
@@ -42,4 +45,5 @@ class SQLiteInterface:
             # cursor = conn.cursor()
             # rows = cursor.execute(query)
             res = pd.read_sql(query, conn)
+        return res 
     

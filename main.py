@@ -86,11 +86,14 @@ def search_text():
 
     try:
         title_pd = database.query(f'select id, imdb_title from {EPISODE_INFO}')
-        all_titles, all_ids = title_pd['IMDB_TITLE'].values, title_pd['ID'].values
-    except:
-        e = sys.exc_info()[0]
-        print(f"Failed to query episode info table: {e}")
+    except BaseException as e:
+        print(f"Failed to query episode info table: {str(e)}")
         all_titles, all_ids = [], []
+    
+    if title_pd is None:
+        all_titles, all_ids = [], []
+    else:
+        all_titles, all_ids = title_pd['IMDB_TITLE'].values, title_pd['ID'].values
     
     fuzzy_match_ratios = np.array([fuzz.partial_ratio(search_text, f) for f in all_titles])
     match_inds = np.argsort(fuzzy_match_ratios)[::-1]
