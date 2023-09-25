@@ -15,6 +15,7 @@ from python.constants import SQLITE_DB, EPISODE_INFO, FILE_PATH_TABLE, SQLITE_FI
 from google.cloud import storage 
 import requests 
 import uuid 
+import sys 
 
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
@@ -83,8 +84,14 @@ def search_text():
     search_text = request_params.get('search_text', '')
     n_results = int(request_params.get('n_results', '5'))
 
-    title_pd = database.query(f'select id, imdb_title from {EPISODE_INFO}')
-    all_titles, all_ids = title_pd['IMDB_TITLE'].values, title_pd['ID'].values
+    try:
+        title_pd = database.query(f'select id, imdb_title from {EPISODE_INFO}')
+        all_titles, all_ids = title_pd['IMDB_TITLE'].values, title_pd['ID'].values
+    except:
+        e = sys.exc_info()[0]
+        print(f"Failed to query episode info table: {e}")
+        all_titles, all_ids = [], []
+    
     fuzzy_match_ratios = np.array([fuzz.partial_ratio(search_text, f) for f in all_titles])
     match_inds = np.argsort(fuzzy_match_ratios)[::-1]
     search_data = {

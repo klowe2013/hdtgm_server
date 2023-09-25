@@ -42,5 +42,4 @@ class SQLiteInterface:
             # cursor = conn.cursor()
             # rows = cursor.execute(query)
             res = pd.read_sql(query, conn)
-        return res 
     

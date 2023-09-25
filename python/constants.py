@@ -19,6 +19,6 @@ FILEPATH     TEXT    NOT NULL
 )
 """
 
-SQLITE_DB = 'hdtgm_test_database.db'
-EPISODE_INFO = 'episode_info_test'
-FILE_PATH_TABLE = 'episode_paths_test'
+SQLITE_DB = 'hdtgm_database.db'
+EPISODE_INFO = 'episode_info'
+FILE_PATH_TABLE = 'episode_paths'
