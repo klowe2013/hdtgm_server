@@ -27,19 +27,6 @@ except:
     r = 1
 app = Flask(__name__)
 
-# BASE_DIR = '/hdtgm-player/media/audio_files/'
-BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
-# BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
-# BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
-# all_files = glob.glob(f'{BASE_DIR}/*')
-# all_filenames = sorted([f.split('/')[-1] for f in all_files])
-# all_titles = [f.replace('_', '') for f in all_filenames]
-
-global bucket, blobs, all_filenames, all_titles
-BASE_BUCKET = 'hdtgm-episodes'
-client = storage.Client(project='hdtgm-player')
-bucket = client.bucket(BASE_BUCKET)
-
 database = DatabaseFactory(SQLITE_DB).create('sqlite')
     
 @app.route('/')
@@ -47,9 +34,6 @@ def index():
     return redirect('/search')
 
 def get_all_titles():
-    # blobs = client.list_blobs(BASE_BUCKET)
-    # all_filenames = sorted([blob.name for blob in blobs])
-    # # all_titles = [f.replace('_', '') for f in all_filenames]
     all_filenames = [
         str(v) 
         for v in database.query(f'select distinct(imdb_title) from {EPISODE_INFO}')['IMDB_TITLE'].values
@@ -106,14 +90,26 @@ def search_text():
         mimetype='application/json')
     return res
 
+@app.route('/get_info_by_id/<string:id>')
+def get_info_by_id(id):
+    
+    print(f'pulling info for id {id}')
+    episode_info = database.query(
+        f"""
+        select * from {EPISODE_INFO} 
+        where id=='{id}'
+        """
+    ).to_dict(orient='list')
+    
+    res = app.response_class(response=json.dumps(episode_info),
+        status=200,
+        mimetype='application/json')
+    return res
 
 @app.route('/audio_by_id/<string:id>')
 def get_audio_by_id(id):
     
     print(f'pulling audio for id {id}')
-    # TODO: Request gets numerical 1-n ID, not new unique internal ID.
-    # Update request (probably in JS files?) to account for this
-
     # Default to pull from Redis cache
     start_time = time.time()
     if hasattr(r, 'set'):
@@ -132,7 +128,6 @@ def get_audio_by_id(id):
             """
         )['FILEPATH'].values[0]
 
-        # with open(f"{BASE_DIR}/{this_file}", 'rb') as f:
         with open(this_file, 'rb') as f:
             audio_data = base64.b64encode(f.read()).decode('UTF-8')
             print(f'Loaded data from source file in {time.time()-start_time:.2f}s: {audio_data[:100]}')

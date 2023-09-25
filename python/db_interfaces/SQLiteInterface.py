@@ -30,6 +30,7 @@ class SQLiteInterface:
         VALUES {tuple([v for k, v in data.items()])};
         """
         )
+        print(q)
         try:
             with sqlite3.connect(self.database) as conn:
                 cursor = conn.cursor()
