@@ -13,5 +13,12 @@ CAST    TEXT
 )
 """
 
+SQLITE_FILEPATH_SCHEMA = """
+(ID    TEXT    PRIMARY KEY    NOT NULL,
+FILEPATH     TEXT    NOT NULL
+)
+"""
+
 SQLITE_DB = 'hdtgm_test_database.db'
 EPISODE_INFO = 'episode_info_test'
+FILE_PATH_TABLE = 'episode_paths_test'

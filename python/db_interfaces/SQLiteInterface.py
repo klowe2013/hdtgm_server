@@ -34,6 +34,7 @@ class SQLiteInterface:
             cursor = conn.cursor()
             rows = cursor.execute(q)
             conn.commit()
+    
         return rows 
     
     def query(self, query):

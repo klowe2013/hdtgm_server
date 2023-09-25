@@ -9,7 +9,7 @@ from python.constants import SQLITE_EPISODE_SCHEMA, SQLITE_DB, EPISODE_INFO
 class EpisodeIngestor:
     media_dir = './media/audio_files/'
     DATABASE = SQLITE_DB
-    TABLE = EPISODE_INFO
+    INFO_TABLE = EPISODE_INFO
         
     def __init__(self):
         self.episode_name = ''
@@ -17,14 +17,14 @@ class EpisodeIngestor:
         self.imdb = Cinemagoer()
         self.imdb_info = {}
 
-    def _write_entry(self, data):
+    def _write_entry(self, data, table):
         print(f'Writing ID {data["id"]} ({data["filename"]}) to DB')
         
-        rows = self.database.write_entry(data, self.TABLE)
+        rows = self.database.write_entry(data, table)
         return rows 
     
-    def _create_table(self):
-        self.database.create_table(self.TABLE, SQLITE_EPISODE_SCHEMA)
+    def _create_table(self, table, schema):
+        self.database.create_table(table, schema)
 
     @staticmethod
     def parse_title(filename):
@@ -78,10 +78,10 @@ class EpisodeIngestor:
         return imdb_info 
     
     
-    def ingest(self, episode_name, initialize=True):
+    def ingest(self, internal_id, episode_name, initialize=True):
         
-        # Get title, episode number, ID
-        internal_id = str(uuid.uuid4())
+        # TODO: get episode_name from internal_id lookup
+        # episode_name = self._get_name_from_id(internal_id)
         
         # Get title and episode number
         title = self.parse_title(episode_name)
@@ -106,9 +106,11 @@ class EpisodeIngestor:
         all_info['genres'] = ', '.join(imdb_info['genres'])
         all_info['cast'] = ', '.join(imdb_info['cast'])
 
-        # Write audio data to Cassandra
+        # Write audio data to DB
+        # TODO: Move the initialization to an init script
         if initialize:
-            self._create_table()
-        self._write_entry(all_info)
+            self.database.create_table(self.INFO_TABLE, SQLITE_EPISODE_SCHEMA)
+        rows = self.database.write_entry(all_info, self.INFO_TABLE)
+
 
         

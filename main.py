@@ -11,7 +11,7 @@ import time
 import os 
 from python.EpisodeIngestor import EpisodeIngestor
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
-from python.constants import SQLITE_DB, EPISODE_INFO
+from python.constants import SQLITE_DB, EPISODE_INFO, FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
 from google.cloud import storage 
 import requests 
 import uuid 
@@ -27,7 +27,7 @@ except:
 app = Flask(__name__)
 
 # BASE_DIR = '/hdtgm-player/media/audio_files/'
-# BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
+BASE_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/media/audio_files/'
 # BASE_DIR = '/Users/kaleb/Documents/HDTGM Episodes/'
 # BASE_DIR = '/home/pi/Documents/hdtgm_server/media/audio_files/audio_files/'
 # all_files = glob.glob(f'{BASE_DIR}/*')
@@ -83,11 +83,12 @@ def search_text():
     search_text = request_params.get('search_text', '')
     n_results = int(request_params.get('n_results', '5'))
 
-    all_titles = get_all_titles()
+    title_pd = database.query(f'select id, imdb_title from {EPISODE_INFO}')
+    all_titles, all_ids = title_pd['IMDB_TITLE'].values, title_pd['ID'].values
     fuzzy_match_ratios = np.array([fuzz.partial_ratio(search_text, f) for f in all_titles])
     match_inds = np.argsort(fuzzy_match_ratios)[::-1]
     search_data = {
-        'episodes': {int(match): all_titles[match] for match in match_inds[:n_results]}
+        'episodes': {all_ids[match]: all_titles[match] for match in match_inds[:n_results]}
     }
     
     res = app.response_class(response=json.dumps(search_data),
@@ -96,10 +97,12 @@ def search_text():
     return res
 
 
-@app.route('/audio_by_id/<int:id>')
+@app.route('/audio_by_id/<string:id>')
 def get_audio_by_id(id):
     
     print(f'pulling audio for id {id}')
+    # TODO: Request gets numerical 1-n ID, not new unique internal ID.
+    # Update request (probably in JS files?) to account for this
 
     # Default to pull from Redis cache
     start_time = time.time()
@@ -111,15 +114,24 @@ def get_audio_by_id(id):
         audio_data = None 
 
     if audio_data is None:
-        # with open(f"{BASE_DIR}/{all_filenames[id]}", 'rb') as f:
+        # Get path to file
+        this_file = database.query(
+            f"""
+            select FILEPATH from {FILE_PATH_TABLE} 
+            where id=='{id}'
+            """
+        )['FILEPATH'].values[0]
+
+        # with open(f"{BASE_DIR}/{this_file}", 'rb') as f:
+        with open(this_file, 'rb') as f:
+            audio_data = base64.b64encode(f.read()).decode('UTF-8')
+            print(f'Loaded data from source file in {time.time()-start_time:.2f}s: {audio_data[:100]}')
+            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
+        # audio_blob = bucket.blob(f"{all_filenames[id]}")
+        # with audio_blob.open('rb') as f:
         #     audio_data = base64.b64encode(f.read()).decode('UTF-8')
         #     print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
         #     if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
-        audio_blob = bucket.blob(f"{all_filenames[id]}")
-        with audio_blob.open('rb') as f:
-            audio_data = base64.b64encode(f.read()).decode('UTF-8')
-            print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
-            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 
@@ -142,6 +154,15 @@ def episode_upload():
         # Get title, episode number, ID
         internal_id = str(uuid.uuid4())
         # TODO: Write table ID -> storage location
+        id_info = {
+            'id': internal_id,
+            'filepath': os.path.join(upload_folder, filename)
+        }
+        try:
+            database.write_entry(id_info, FILE_PATH_TABLE)
+        except:
+            database.create_table(FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA)
+            database.write_entry(id_info, FILE_PATH_TABLE)
         
         # TODO: store to GCP bucket
         # blob = bucket.blob(uploaded_file.filename)

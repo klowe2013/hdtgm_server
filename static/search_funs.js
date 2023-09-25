@@ -26,6 +26,7 @@ search_btn.addEventListener("click", async () => {
     let {episodes: episode_list} = await res.json();
     let episode_ids = Object.keys(episode_list)
     for (i=0; i < episode_ids.length; i++){
+        console.log(`Adding new option: id=${episode_ids[i]}, title=${episode_list[episode_ids[i]]}`)
         let option = document.createElement("option")
         option.value = episode_ids[i]
         option.text = episode_list[episode_ids[i]]
