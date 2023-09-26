@@ -86,3 +86,13 @@ audio {
   display: flex;
   justify-content: center;
 }
+
+.card-title {
+  border-style: outset;
+  border-radius: 10px;
+  border-color: rgb(84, 84, 84);
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 5px;
+  background-color: rgb(217, 220, 219);
+}

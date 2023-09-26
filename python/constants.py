@@ -1,3 +1,5 @@
+from string import Template
+
 CASSANDRA_FILE_SCHEMA = '(id text, filename text, binary text, PRIMARY KEY (id))'
 SQLITE_EPISODE_SCHEMA = """
 (FILENAME    TEXT    PRIMARY KEY    NOT NULL,

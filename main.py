@@ -49,6 +49,10 @@ def player():
     }
     return render_template('player.html', **template_data)
 
+@app.route('/testcard')
+def test_dard():
+    return render_template('test_card.html')
+
 @app.route('/search', methods=['GET', 'POST'])
 def search_page():
     template_data = {
