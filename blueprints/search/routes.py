@@ -1,5 +1,6 @@
 from flask import Blueprint, request, current_app
 from python.constants import EPISODE_INFO 
+from python.CardMaker import CardMaker 
 from fuzzywuzzy import fuzz 
 import numpy as np 
 import json 
@@ -35,11 +36,14 @@ def search_text():
     
     fuzzy_match_ratios = np.array([fuzz.partial_ratio(search_text, f) for f in all_titles])
     match_inds = np.argsort(fuzzy_match_ratios)[::-1]
-    search_data = {
-        'episodes': {all_ids[match]: all_titles[match] for match in match_inds[:n_results]}
+
+    match_ids = [all_ids[match] for match in match_inds[:n_results]]
+    match_cards = {
+        id: CardMaker(id, database=database).create_card() 
+        for id in match_ids
     }
-    
-    res = app.response_class(response=json.dumps(search_data),
+        
+    res = app.response_class(response=json.dumps(match_cards),
         status=200,
         mimetype='application/json')
     return res

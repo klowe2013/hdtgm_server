@@ -14,9 +14,11 @@ class CardMaker:
 </div>
 """
 )
-    def __init__(self, episode_id):
+    def __init__(self, episode_id, database=None):
         self.episode_id = episode_id
-        self.database = DatabaseFactory(SQLITE_DB).create('sqlite')
+        self.database = database
+        if self.database is None:
+            self.database = DatabaseFactory(SQLITE_DB).create('sqlite')
 
     def create_card(self):
         episode_info = self.database.query(f"""

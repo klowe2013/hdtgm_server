@@ -23,15 +23,19 @@ n_episodes = document.getElementById("n_episodes")
 search_btn.addEventListener("click", async () => {
     removeOptions(episode_selector)
     let res = await send_search(search_text.value, n_episodes.value)
-    let {episodes: episode_list} = await res.json();
-    let episode_ids = Object.keys(episode_list)
-    for (i=0; i < episode_ids.length; i++){
-        console.log(`Adding new option: id=${episode_ids[i]}, title=${episode_list[episode_ids[i]]}`)
-        let option = document.createElement("option")
-        option.value = episode_ids[i]
-        option.text = episode_list[episode_ids[i]]
-        episode_selector.add(option)
-    }
+    // let {episodes: episode_list} = await res.json();
+    let res2 = await res.json();
+    console.log(res2)
+    // let episode_ids = Object.keys(episode_list)
+    // for (i=0; i < episode_ids.length; i++){
+    //     console.log(`Adding new div: id=${episode_ids[i]}, title=${episode_list[episode_ids[i]]}`)
+    //     let option = document.createElement("div")
+    //     option.innerHTML = episode_list[episode_ids[i]]
+    //     document.body.appendChild(option)
+    //     // option.value = episode_ids[i]
+    //     // option.text = episode_list[episode_ids[i]]
+    //     // episode_selector.add(option)
+    // }
 });
 
 const form = document.querySelector('form');
