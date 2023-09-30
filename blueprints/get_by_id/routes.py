@@ -1,4 +1,5 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, send_file
+from io import BytesIO
 from python.constants import FILE_PATH_TABLE, EPISODE_INFO
 import json 
 import time 
@@ -11,6 +12,23 @@ with app.app_context():
     id_bp = Blueprint(
         'id_bp', __name__, static_folder='static'
     )
+
+@id_bp.route('/download_by_id/<string:id>')
+def download_by_id(id):
+    
+    print(f'Downloading episode {id}')
+    this_file = database.query(
+        f"""
+        select FILEPATH from {FILE_PATH_TABLE} 
+        where id=='{id}'
+        """
+    )['FILEPATH'].values[0]
+
+    with open(this_file, 'rb') as f:
+        send_data = BytesIO(f.read())
+        
+    return  send_file(send_data, download_name=this_file.split('/')[-1], as_attachment=True)
+
 
 @id_bp.route('/get_info_by_id/<string:id>')
 def get_info_by_id(id):

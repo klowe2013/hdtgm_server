@@ -67,3 +67,25 @@ play_btn.addEventListener("click", function () {
     }
 })
 
+download_curr_episode = () => {
+    let episode_id = ep_selector.value 
+    let episode_name = ep_selector.options[ep_selector.selectedIndex].text
+    let filename = `${episode_name}.mp3`
+    fetch(`/download_by_id/${episode_id}`)
+        .then((res)=>{
+            return res.blob()
+        }).then((blob)=>{
+           let el = document.createElement("a"); 
+           // creates anchor element but doesn't add it to the DOM
+           el.setAttribute("download", [filename]) 
+           // make the link downloadable on click
+           let url = URL.createObjectURL(blob); 
+           // creates a url to the retrieved file
+           el.href = url; // set the href attribute attribute
+           el.click(); 
+           URL.revokeObjectURL(url)
+        })
+    // catch errors
+    .catch(err=>console.log(err));
+}
+
