@@ -32,24 +32,26 @@ def get_info_by_id(id):
         mimetype='application/json')
     return res
 
-@id_bp.route('/stream_by_id/<int:id>')
+@id_bp.route('/stream_by_id/<string:id>')
 def audio_stream(id):
-    def generate():
-        # Get path to file
-        this_file = database.query(
-            f"""
-            select FILEPATH from {FILE_PATH_TABLE} 
-            where id=='{id}'
-            """
-        )['FILEPATH'].values[0]
+    # Get path to file
+    this_file = database.query(
+        f"""
+        select FILEPATH from {FILE_PATH_TABLE} 
+        where id=='{id}'
+        """
+    )['FILEPATH'].values[0]
 
-        print(f'Streaming "{this_file}" from GCP')
+    print(f'Streaming "{this_file}" from GCP')
+    def generate():
         audio_blob = bucket.blob(this_file)
         with audio_blob.open('rb') as f:
             data = f.read(1024)
+            n_reads = 0
             while data:
                 yield data 
-                data = f.read(1024)
+                data = f.read(1024 * (2**n_reads))
+                n_reads += 1 
     return Response(generate(), mimetype='audio/mp3')
     
 @id_bp.route('/audio_by_id/<string:id>')

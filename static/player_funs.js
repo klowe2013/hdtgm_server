@@ -51,6 +51,10 @@ update_audio = (episode_id) => {
         }
     )    
 }
+// update_audio = (episode_id) => {
+//     console.log('entering update_audio')
+//     player.src = `/stream_by_id/${episode_id}`
+// }
 
 change_btn.addEventListener("click", function () {
     console.log('received click for audio buffer')
