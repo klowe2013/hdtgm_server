@@ -27,14 +27,14 @@ class SQLiteInterface:
         f"""
         INSERT INTO {table} 
         ({', '.join(data.keys())}) 
-        VALUES {tuple([v for k, v in data.items()])};
+        VALUES ({','.join(['?' for _ in range(len(data.keys()))])});
         """
         )
-        print(q)
+        vals = [v for k, v in data.items()]
         try:
             with sqlite3.connect(self.database) as conn:
                 cursor = conn.cursor()
-                rows = cursor.execute(q)
+                rows = cursor.execute(q, vals)
                 conn.commit()
         except sqlite3.IntegrityError as e:
             # UNIQUE constraint failed: episode_info.FILENAME

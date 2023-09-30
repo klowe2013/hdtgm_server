@@ -24,7 +24,7 @@ def search_text():
     n_results = int(request_params.get('n_results', '5'))
 
     try:
-        title_pd = database.query(f'select id, imdb_title from {EPISODE_INFO}')
+        title_pd = database.query(f'select id, imdb_title, episode_no from {EPISODE_INFO}')
     except BaseException as e:
         print(f"Failed to query episode info table: {str(e)}")
         all_titles, all_ids = [], []
@@ -32,12 +32,12 @@ def search_text():
     if title_pd is None:
         all_titles, all_ids = [], []
     else:
-        all_titles, all_ids = title_pd['IMDB_TITLE'].values, title_pd['ID'].values
+        all_titles, all_ids, all_numbers = title_pd['IMDB_TITLE'].values, title_pd['ID'].values, title_pd['EPISODE_NO'].values
     
     fuzzy_match_ratios = np.array([fuzz.partial_ratio(search_text, f) for f in all_titles])
     match_inds = np.argsort(fuzzy_match_ratios)[::-1]
-
     match_ids = [all_ids[match] for match in match_inds[:n_results]]
+
     match_cards = {
         id: CardMaker(id, database=database).create_card() 
         for id in match_ids
