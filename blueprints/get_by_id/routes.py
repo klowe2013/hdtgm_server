@@ -1,8 +1,12 @@
 from flask import Blueprint, current_app
-from python.constants import FILE_PATH_TABLE, EPISODE_INFO
+from python.constants import FILE_PATH_TABLE, EPISODE_INFO, GCLOUD_PREFIX
 import json 
 import time 
 import base64 
+from google.cloud import storage
+
+client = storage.Client('hdtgm-player')
+bucket = client.get_bucket('hdtgm-episodes')
 
 app = current_app
 with app.app_context():
@@ -50,15 +54,16 @@ def get_audio_by_id(id):
             """
         )['FILEPATH'].values[0]
 
-        with open(this_file, 'rb') as f:
-            audio_data = base64.b64encode(f.read()).decode('UTF-8')
-            print(f'Loaded data from source file in {time.time()-start_time:.2f}s: {audio_data[:100]}')
-            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
-        # audio_blob = bucket.blob(f"{all_filenames[id]}")
-        # with audio_blob.open('rb') as f:
+        # with open(this_file, 'rb') as f:
         #     audio_data = base64.b64encode(f.read()).decode('UTF-8')
-        #     print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+        #     print(f'Loaded data from source file in {time.time()-start_time:.2f}s: {audio_data[:100]}')
         #     if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
+        print(f'Reading "{this_file}" from GCP')
+        audio_blob = bucket.blob(this_file)
+        with audio_blob.open('rb') as f:
+            audio_data = base64.b64encode(f.read()).decode('UTF-8')
+            print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+            if hasattr(r, 'set'): r.set(f'audio_data:{id}', audio_data)
     else:
         print(f'Loaded data from cache in {time.time()-start_time:.2f}s')
 

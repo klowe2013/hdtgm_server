@@ -1,9 +1,13 @@
 from flask import Blueprint, request, current_app
 from werkzeug.utils import secure_filename
-from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA 
+from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA , GCLOUD_PREFIX
 from python.EpisodeIngestor import EpisodeIngestor 
 import uuid 
 import os 
+from google.cloud import storage
+
+client = storage.Client('hdtgm-player')
+bucket = client.get_bucket('hdtgm-episodes')
 
 app = current_app
 with app.app_context():
@@ -24,23 +28,28 @@ def episode_upload():
 
         # Get title, episode number, ID
         internal_id = str(uuid.uuid4())
-        # TODO: Write table ID -> storage location
+        # Open blob on GCP
+        print('Opening blob')
+        blob = bucket.blob(os.path.join(GCLOUD_PREFIX, uploaded_file.filename))
+        # Upload the file
+        print(f'Uploading {filename} to blob')
+        blob.upload_from_filename(os.path.join(upload_folder, filename))
+        # Remove from local
+        print('cleaning locally')
+        os.remove(os.path.join(upload_folder, filename))
+        
         id_info = {
             'id': internal_id,
-            'filepath': os.path.join(upload_folder, filename)
+            'filepath': os.path.join(GCLOUD_PREFIX, uploaded_file.filename)
         }
+
+        print(f'Entering path info {id_info} to DB')
         try:
             database.write_entry(id_info, FILE_PATH_TABLE)
         except:
             database.create_table(FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA)
             database.write_entry(id_info, FILE_PATH_TABLE)
         
-        # TODO: store to GCP bucket
-        # blob = bucket.blob(uploaded_file.filename)
-        # print('uploading to GCP')
-        # blob.upload_from_filename(os.path.join(upload_folder, filename))
-        # os.remove(os.path.join(upload_folder, filename))
-
         # Add IMDB Info
         if ingestor is not None:
             ingestor.ingest(internal_id, uploaded_file.filename)
