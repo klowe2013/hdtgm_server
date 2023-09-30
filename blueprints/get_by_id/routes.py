@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, Response 
 from python.constants import FILE_PATH_TABLE, EPISODE_INFO, GCLOUD_PREFIX
 import json 
 import time 
@@ -32,6 +32,26 @@ def get_info_by_id(id):
         mimetype='application/json')
     return res
 
+@id_bp.route('/stream_by_id/<int:id>')
+def audio_stream(id):
+    def generate():
+        # Get path to file
+        this_file = database.query(
+            f"""
+            select FILEPATH from {FILE_PATH_TABLE} 
+            where id=='{id}'
+            """
+        )['FILEPATH'].values[0]
+
+        print(f'Streaming "{this_file}" from GCP')
+        audio_blob = bucket.blob(this_file)
+        with audio_blob.open('rb') as f:
+            data = f.read(1024)
+            while data:
+                yield data 
+                data = f.read(1024)
+    return Response(generate(), mimetype='audio/mp3')
+    
 @id_bp.route('/audio_by_id/<string:id>')
 def get_audio_by_id(id):
     
