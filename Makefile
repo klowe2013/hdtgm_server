@@ -1,7 +1,7 @@
 hello:
 	echo "Hello world"
 
-run_app:
+test-run:
 	./hdtgm_server/bin/python ./app.py 
 
 build-app:
