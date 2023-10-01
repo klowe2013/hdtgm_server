@@ -25,6 +25,7 @@ def search_text():
     try:
         title_pd = database.query(f'select id, imdb_title, episode_no from {EPISODE_INFO}')
     except BaseException as e:
+        title_pd = None 
         print(f"Failed to query episode info table: {str(e)}")
         all_titles, all_ids = [], []
     

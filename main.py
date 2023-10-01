@@ -1,13 +1,12 @@
 from flask import Flask, render_template, request, redirect
-import base64 
-import json 
-import numpy as np 
 import redis 
 import time 
 import os 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
-from python.constants import SQLITE_DB, EPISODE_INFO, FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
-from google.cloud import storage 
+from python.constants import SQLITE_DB
+
+# Set up GCP credentials
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './keys/hdtgm-player-3967c005aeb0.json'
 
 # from constants import REDIS_IP, REDIS_PORT
 REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379

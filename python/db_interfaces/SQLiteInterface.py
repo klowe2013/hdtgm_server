@@ -36,10 +36,11 @@ class SQLiteInterface:
                 cursor = conn.cursor()
                 rows = cursor.execute(q, vals)
                 conn.commit()
+            return rows 
         except sqlite3.IntegrityError as e:
             # UNIQUE constraint failed: episode_info.FILENAME
             print(f'Error writing to db: {e}')    
-        return rows 
+            return None 
     
     def query(self, query):
         with sqlite3.connect(self.database) as conn:

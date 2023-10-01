@@ -21,8 +21,8 @@ FILEPATH     TEXT    NOT NULL
 )
 """
 
-SQLITE_DB = 'hdtgm_database_gcp_test.db'
-EPISODE_INFO = 'episode_info_gcp_test'
-FILE_PATH_TABLE = 'episode_paths_gcp_test'
+SQLITE_DB = 'hdtgm_database.db'
+EPISODE_INFO = 'episode_info'
+FILE_PATH_TABLE = 'episode_paths'
 
 GCLOUD_PREFIX = 'episode_files'
