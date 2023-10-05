@@ -1,6 +1,6 @@
 from flask import Blueprint, request, current_app
 from werkzeug.utils import secure_filename
-from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA 
+from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
 from python.EpisodeIngestor import EpisodeIngestor 
 import uuid 
 import os 
@@ -19,28 +19,23 @@ def episode_upload():
     upload_folder = './media/audio_files'
     uploaded_files = request.files.getlist('file')
     for uploaded_file in uploaded_files:
-        filename = secure_filename(uploaded_file.filename)
-        uploaded_file.save(os.path.join(upload_folder, filename))
+        uploaded_file.save(os.path.join(upload_folder, uploaded_file.filename))
 
         # Get title, episode number, ID
         internal_id = str(uuid.uuid4())
-        # TODO: Write table ID -> storage location
+        
         id_info = {
             'id': internal_id,
-            'filepath': os.path.join(upload_folder, filename)
+            'filepath': os.path.join(upload_folder, uploaded_file.filename)
         }
+
+        print(f'Entering path info {id_info} to DB')
         try:
             database.write_entry(id_info, FILE_PATH_TABLE)
         except:
             database.create_table(FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA)
             database.write_entry(id_info, FILE_PATH_TABLE)
         
-        # TODO: store to GCP bucket
-        # blob = bucket.blob(uploaded_file.filename)
-        # print('uploading to GCP')
-        # blob.upload_from_filename(os.path.join(upload_folder, filename))
-        # os.remove(os.path.join(upload_folder, filename))
-
         # Add IMDB Info
         if ingestor is not None:
             ingestor.ingest(internal_id, uploaded_file.filename)

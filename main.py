@@ -1,28 +1,14 @@
 from flask import Flask, render_template, request, redirect
-import base64 
-import json 
-import numpy as np 
-import redis 
 import time 
 import os 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
-from python.constants import SQLITE_DB, EPISODE_INFO, FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
-from google.cloud import storage 
+from python.constants import SQLITE_DB
 
-# from constants import REDIS_IP, REDIS_PORT
-REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
-
-r = 1 #redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
-try: 
-    r.set('up_check', 'up')
-except:
-    r = 1
 app = Flask(__name__)
 
 database = DatabaseFactory(SQLITE_DB).create('sqlite')
 
 app.config['database'] = database 
-app.config['redis'] = r 
 
 with app.app_context():
     from blueprints.player.routes import player_bp
