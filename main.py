@@ -1,27 +1,14 @@
 from flask import Flask, render_template, request, redirect
-import redis 
 import time 
 import os 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
 from python.constants import SQLITE_DB
 
-# Set up GCP credentials
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './keys/hdtgm-player-3967c005aeb0.json'
-
-# from constants import REDIS_IP, REDIS_PORT
-REDIS_IP, REDIS_PORT = os.getenv('REDIS_IP', '172.17.0.1'), 6379
-
-r = 1 #redis.Redis(host=REDIS_IP, port=REDIS_PORT, decode_responses=True)
-try: 
-    r.set('up_check', 'up')
-except:
-    r = 1
 app = Flask(__name__)
 
 database = DatabaseFactory(SQLITE_DB).create('sqlite')
 
 app.config['database'] = database 
-app.config['redis'] = r 
 
 with app.app_context():
     from blueprints.player.routes import player_bp
