@@ -1,10 +1,12 @@
-from flask import Blueprint, current_app, Response, send_file, render_template
-from python.constants import FILE_PATH_TABLE, EPISODE_INFO
-from python.EpisodeCard import EpisodeCard
+from flask import Blueprint, current_app, Response 
+from python.constants import FILE_PATH_TABLE, EPISODE_INFO, GCLOUD_PREFIX
 import json 
 import time 
 import base64 
-from io import BytesIO
+from google.cloud import storage
+
+client = storage.Client('hdtgm-player')
+bucket = client.get_bucket('hdtgm-episodes')
 
 app = current_app
 with app.app_context():
@@ -12,23 +14,6 @@ with app.app_context():
     id_bp = Blueprint(
         'id_bp', __name__, static_folder='static'
     )
-
-@id_bp.route('/download_by_id/<string:id>')
-def download_by_id(id):
-    
-    print(f'Downloading episode {id}')
-    this_file = database.query(
-        f"""
-        select FILEPATH from {FILE_PATH_TABLE} 
-        where id=='{id}'
-        """
-    )['FILEPATH'].values[0]
-
-    with open(this_file, 'rb') as f:
-        send_data = BytesIO(f.read())
-        
-    return  send_file(send_data, download_name=this_file.split('/')[-1], as_attachment=True)
-
 
 @id_bp.route('/get_info_by_id/<string:id>')
 def get_info_by_id(id):
@@ -58,7 +43,8 @@ def audio_stream(id):
 
     print(f'Streaming "{this_file}" from GCP')
     def generate():
-        with open(this_file, 'rb') as f:
+        audio_blob = bucket.blob(this_file)
+        with audio_blob.open('rb') as f:
             data = f.read(1024)
             n_reads = 0
             while data:
@@ -82,19 +68,14 @@ def get_audio_by_id(id):
         """
     )['FILEPATH'].values[0]
 
-    with open(this_file, 'rb') as f:
+    print(f'Reading "{this_file}" from GCP')
+    audio_blob = bucket.blob(this_file)
+    with audio_blob.open('rb') as f:
         audio_data = base64.b64encode(f.read()).decode('UTF-8')
-        print(f'Loaded data from source file in {time.time()-start_time:.2f}s: {audio_data[:100]}')
-        
+        print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+
     data = {"snd": audio_data}
     res = app.response_class(response=json.dumps(data),
         status=200,
         mimetype='application/json')
     return res
-
-@id_bp.route('/episode_cards/<string:id>')
-def get_episode_card(id):
-    
-    data = EpisodeCard(id, database=database).get_card_info()
-    
-    return render_template('episode_info.html', **data)

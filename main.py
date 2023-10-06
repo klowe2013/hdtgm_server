@@ -1,10 +1,14 @@
 from flask import Flask, render_template, request, redirect
+import base64 
+import json 
+import numpy as np 
+import redis 
 import time 
 import os 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
-from python.constants import SQLITE_DB
+from python.constants import SQLITE_DB, EPISODE_INFO, FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
 
-# Adding test comment to test push/pull
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './keys/hdtgm-player-3967c005aeb0.json'
 
 app = Flask(__name__)
 
