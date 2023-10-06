@@ -4,6 +4,8 @@ import os
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
 from python.constants import SQLITE_DB
 
+# Adding test comment to test push/pull
+
 app = Flask(__name__)
 
 database = DatabaseFactory(SQLITE_DB).create('sqlite')

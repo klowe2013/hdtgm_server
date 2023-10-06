@@ -26,17 +26,19 @@ def copy_sample_episodes():
     base_dir = '/Users/kaleb/Documents/HDTGM Episodes/'
     all_files = glob.glob(base_dir+'*')
     n_to_transfer = min(5, len(all_files))
+    n_transferred = 0
     for i in range(n_to_transfer):
         logging.info(f"Moving {all_files[i]}")
         shutil.copyfile(all_files[i], '/'.join([UPLOAD_QUEUE, all_files[i].split('/')[-1]]))
+        n_transferred += 1
     
-    all_files = glob.glob(UPLOAD_QUEUE+'/*')
-    fnames = [f.split('/')[-1] for f in all_files]
-    post_files = [('upload_file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
-    logging.info('Sending post request')
-    res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
+    # all_files = glob.glob(UPLOAD_QUEUE+'/*')
+    # fnames = [f.split('/')[-1] for f in all_files]
+    # post_files = [('upload_file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
+    # logging.info('Sending post request')
+    # res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
     
-    return res 
+    return n_transferred
 
 def upload_new_episodes():
     """
@@ -49,9 +51,10 @@ def upload_new_episodes():
     #     uploader.cleanup()
     all_files = glob.glob(UPLOAD_QUEUE+'/*')
     fnames = [f.split('/')[-1] for f in all_files]
+    logging.info(f"Found {fnames} to post")
     post_files = [('upload_file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
-    res = True #requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
-    return res 
+    res = requests.post('http://192.168.132.109:5000/episode_upload', files=post_files)
+    return fnames 
 
 def cleanup(new_files):
     for f in new_files:
