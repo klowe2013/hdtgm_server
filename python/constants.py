@@ -2,8 +2,8 @@ from string import Template
 
 CASSANDRA_FILE_SCHEMA = '(id text, filename text, binary text, PRIMARY KEY (id))'
 SQLITE_EPISODE_SCHEMA = """
-(FILENAME    TEXT    PRIMARY KEY    NOT NULL,
-ID     TEXT    NOT NULL, 
+(ID    TEXT    PRIMARY KEY    NOT NULL,
+FILENAME     TEXT    NOT NULL, 
 EPISODE_NO  INT NOT NULL,
 TITLE   TEXT    NOT NULL,
 IMDB_TITLE  TEXT,

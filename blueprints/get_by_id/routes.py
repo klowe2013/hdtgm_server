@@ -1,5 +1,6 @@
-from flask import Blueprint, current_app, Response, send_file
+from flask import Blueprint, current_app, Response, send_file, render_template
 from python.constants import FILE_PATH_TABLE, EPISODE_INFO
+from python.EpisodeCard import EpisodeCard
 import json 
 import time 
 import base64 
@@ -90,3 +91,10 @@ def get_audio_by_id(id):
         status=200,
         mimetype='application/json')
     return res
+
+@id_bp.route('/episode_cards/<string:id>')
+def get_episode_card(id):
+    
+    data = EpisodeCard(id, database=database).get_card_info()
+    
+    return render_template('episode_info.html', **data)
