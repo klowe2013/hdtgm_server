@@ -58,4 +58,5 @@ const getCardData = async (episode_id) => {
 const redirectInfoPage = () => {
     let episode_id = episode_selector.value
     window.location.href = `/episode_cards/${episode_id}`;
+
 }
