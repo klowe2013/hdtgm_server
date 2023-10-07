@@ -4,4 +4,4 @@
 kafka_test.ipynb
 /keys
 /dockerfiles/data/
-hdtgm_database.db
+/*.db
