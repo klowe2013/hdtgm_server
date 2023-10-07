@@ -90,22 +90,32 @@ class EpisodeIngestor:
         print(f'parsed episode {episode_name} into episode #{episode_no}: {title}')
 
         # Get IMDB Info
-        imdb_info = self._search_title(self.imdb, title)
-        print(imdb_info)
+        try:
+            imdb_info = self._search_title(self.imdb, title)
+            print(imdb_info)
+        except BaseException as e:
+            print(e)
 
         all_info = {
             'id': internal_id,
             'filename': episode_name,
             'title': title,
-            'episode_no': episode_no
+            'episode_no': episode_no,
+            'imdb_title': '',
+            'genres': '',
+            'description': '',
+            'rating': -1,
+            'year': 0000,
+            'cast': ''
         }
 
         # Add IMDB Info
         for k, v in imdb_info.items():
-            all_info[k] = v
-        all_info['genres'] = ', '.join(imdb_info['genres'])
-        all_info['cast'] = ', '.join(imdb_info['cast'])
-
+            if k in ['genres', 'cast']:
+                all_info[k] = ', '.join(v)
+            else:
+                all_info[k] = v
+        
         # Write audio data to DB
         # TODO: Move the initialization to an init script
         if initialize:

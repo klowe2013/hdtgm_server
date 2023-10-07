@@ -29,7 +29,7 @@ def copy_sample_episodes():
     n_transferred = 0
     for i in range(n_to_transfer):
         logging.info(f"Moving {all_files[i]}")
-        shutil.copyfile(all_files[i], '/'.join([UPLOAD_QUEUE, all_files[i].split('/')[-1]]))
+        shutil.move(all_files[i], '/'.join([UPLOAD_QUEUE, all_files[i].split('/')[-1]]))
         n_transferred += 1
     
     # all_files = glob.glob(UPLOAD_QUEUE+'/*')
@@ -49,11 +49,13 @@ def upload_new_episodes():
     # res = uploader.send_requests(new_files)
     # if res.status_code == 200:
     #     uploader.cleanup()
+
     all_files = glob.glob(UPLOAD_QUEUE+'/*')
     fnames = [f.split('/')[-1] for f in all_files]
     logging.info(f"Found {fnames} to post")
     post_files = [('upload_file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
-    res = requests.post('http://192.168.132.109:5000/episode_upload', files=post_files)
+    logging.info(f'About to post {post_files}')
+    res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
     return fnames 
 
 def cleanup(new_files):

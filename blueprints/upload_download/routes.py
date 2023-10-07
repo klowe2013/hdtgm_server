@@ -17,7 +17,8 @@ def episode_upload():
     ingestor = EpisodeIngestor()
     
     upload_folder = './media/audio_files'
-    uploaded_files = request.files.getlist('file')
+    uploaded_files = request.files.getlist('upload_file')
+    print(f'received {uploaded_files}')
     for uploaded_file in uploaded_files:
         uploaded_file.save(os.path.join(upload_folder, uploaded_file.filename))
 
