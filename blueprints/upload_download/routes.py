@@ -4,6 +4,11 @@ from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
 from python.EpisodeIngestor import EpisodeIngestor 
 import uuid 
 import os 
+import logging
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
+logger = logging.getLogger("upload_routes")
 
 app = current_app
 with app.app_context():
@@ -15,10 +20,10 @@ with app.app_context():
 @upload_bp.route('/episode_upload', methods=['GET', 'POST'])
 def episode_upload():
     ingestor = EpisodeIngestor()
-    
+    logging.info(request.files)
     upload_folder = './media/audio_files'
-    uploaded_files = request.files.getlist('upload_file')
-    print(f'received {uploaded_files}')
+    uploaded_files = request.files.getlist('file')
+    logging.info(f'received {uploaded_files}')
     for uploaded_file in uploaded_files:
         uploaded_file.save(os.path.join(upload_folder, uploaded_file.filename))
 

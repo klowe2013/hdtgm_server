@@ -38,8 +38,8 @@ def upload_new_episodes():
     fnames = [f.split('/')[-1] for f in all_files]
     logging.info(f"Found {fnames} to post")
     post_files = [('file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
-    # res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
-    res = requests.post('http://192.168.132.12/episode_upload', files=post_files)
+    logging.info(f'About to post {post_files}')
+    res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
     if res.status_code == 200:
         cleanup(fnames)
     return res 
