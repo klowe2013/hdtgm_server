@@ -46,8 +46,8 @@ def upload_new_episodes():
 
 def cleanup(new_files):
     for f in new_files:
-        # print(f"Would remove {os.path.join(UPLOAD_QUEUE, f)}")
-        os.remove(os.path.join(UPLOAD_QUEUE, f))
+        print(f"Would remove {os.path.join(UPLOAD_QUEUE, f)}")
+        # os.remove(os.path.join(UPLOAD_QUEUE, f))
 
 def main():
     n_transferred = copy_sample_episodes()
