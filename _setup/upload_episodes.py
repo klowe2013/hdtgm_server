@@ -4,6 +4,8 @@ import shutil
 import os 
 import requests 
 
+# app_host = os.getenv('HOST', 'localhost:5000')
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
 logger = logging.getLogger("spark_structured_streaming")
@@ -35,9 +37,9 @@ def upload_new_episodes():
     all_files = glob.glob(UPLOAD_QUEUE+'/*')
     fnames = [f.split('/')[-1] for f in all_files]
     logging.info(f"Found {fnames} to post")
-    post_files = [('upload_file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
-    logging.info(f'About to post {post_files}')
-    res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
+    post_files = [('file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
+    # res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
+    res = requests.post('http://192.168.132.12/episode_upload', files=post_files)
     if res.status_code == 200:
         cleanup(fnames)
     return res 
