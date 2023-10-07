@@ -38,12 +38,16 @@ def upload_new_episodes():
     all_files = glob.glob(UPLOAD_QUEUE+'/*')
     fnames = [f.split('/')[-1] for f in all_files]
     logging.info(f"Found {fnames} to post")
-    post_files = [('file', open(os.path.join(UPLOAD_QUEUE, f),'rb')) for f in fnames]
-    logging.info(f'About to post {post_files}')
-    res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
-    if res.status_code == 200:
-        cleanup(fnames)
-    return res 
+    episodes_transferred = 0
+    for f in fnames:
+        logging.info(f'Posting {f}')
+        # res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
+        post_files = [('file', open(os.path.join(UPLOAD_QUEUE, f),'rb'))]
+        res = requests.post('http://192.168.132.12/episode_upload', files=post_files)
+        if res.status_code == 200:
+            episodes_transferred += 1
+            shutil.move(os.path.join(UPLOAD_QUEUE, f), os.path.join(CLEANUP_DIR, f))
+    return episodes_transferred
 
 def cleanup(new_files):
     for f in new_files:
@@ -51,11 +55,11 @@ def cleanup(new_files):
         os.move(os.path.join(UPLOAD_QUEUE, f), os.path.join(CLEANUP_DIR, f))
 
 def main():
-    n_transferred = copy_sample_episodes()
-    upload_new_episodes()
+    n_to_transfer = copy_sample_episodes()
+    n_transferred = upload_new_episodes()
     import datetime
     with open('/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/test_txt.txt', 'r+') as f:
-        f.write(f'Finished transferring {n_transferred} new episodes at {datetime.datetime.now()}')
+        f.write(f'Finished transferring {n_transferred} of {n_to_transfer} new episodes at {datetime.datetime.now()}')
 
 if __name__ == '__main__':
     main()
