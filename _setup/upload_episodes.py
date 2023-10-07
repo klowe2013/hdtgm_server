@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger("spark_structured_streaming")
 
 UPLOAD_QUEUE = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/_setup/audio_files'
+CLEANUP_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/_setup/audio_files_uploaded'
 
 def copy_sample_episodes():
     base_dir = '/Users/kaleb/Documents/HDTGM Episodes/'
@@ -46,8 +47,8 @@ def upload_new_episodes():
 
 def cleanup(new_files):
     for f in new_files:
-        print(f"Would remove {os.path.join(UPLOAD_QUEUE, f)}")
-        # os.remove(os.path.join(UPLOAD_QUEUE, f))
+        print(f"Removing {os.path.join(UPLOAD_QUEUE, f)}")
+        os.move(os.path.join(UPLOAD_QUEUE, f), os.path.join(CLEANUP_DIR, f))
 
 def main():
     n_transferred = copy_sample_episodes()
