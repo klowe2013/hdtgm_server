@@ -5,6 +5,12 @@ import uuid
 import json 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory 
 from python.constants import SQLITE_EPISODE_SCHEMA, SQLITE_DB, EPISODE_INFO
+import logging
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
+logger = logging.getLogger("episode_ingestion")
+
 
 class EpisodeIngestor:
     media_dir = './media/audio_files/'
@@ -87,14 +93,15 @@ class EpisodeIngestor:
         title = self.parse_title(episode_name)
         episode_no = self.get_episode_no(episode_name)
 
-        print(f'parsed episode {episode_name} into episode #{episode_no}: {title}')
+        logging.info(f'parsed episode {episode_name} into episode #{episode_no}: {title}')
 
         # Get IMDB Info
         try:
             imdb_info = self._search_title(self.imdb, title)
-            print(imdb_info)
+            logging.info(imdb_info)
         except BaseException as e:
-            print(e)
+            imdb_info = {}
+            logging.info(f"Failed to find {title} on IMDB: {e}")
 
         all_info = {
             'id': internal_id,

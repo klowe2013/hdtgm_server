@@ -8,7 +8,7 @@ import requests
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
-logger = logging.getLogger("spark_structured_streaming")
+logger = logging.getLogger("episode_uploading")
 
 UPLOAD_QUEUE = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/_setup/audio_files'
 CLEANUP_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/_setup/audio_files_uploaded'
