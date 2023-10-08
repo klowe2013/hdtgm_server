@@ -24,4 +24,7 @@ build-dev:
 run-dev:
 	docker run -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
 
+debug-dev:
+	./hdtgm_server/bin/python ./main.py
+
 	
