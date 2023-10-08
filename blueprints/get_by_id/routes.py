@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, Response, send_file, render_template
+from flask import Blueprint, current_app, Response, send_file, render_template, request 
 from python.constants import FILE_PATH_TABLE, EPISODE_INFO
 from python.EpisodeCard import EpisodeCard
 import json 
@@ -67,10 +67,10 @@ def audio_stream(id):
                 n_reads += 1 
     return Response(generate(), mimetype='audio/mp3')
     
-@id_bp.route('/audio_by_id/<string:id>')
-def get_audio_by_id(id):
-    
-    print(f'pulling audio for id {id}')
+@id_bp.route('/audio_by_id/<string:id>_<int:chunk>')
+def get_audio_by_id(id, chunk):
+
+    print(f'pulling audio for id {id}, chunk {chunk}')
     # Default to pull from Redis cache
     start_time = time.time()
     
