@@ -1,10 +1,20 @@
-FROM python:3.9-slim
+# FROM python:3.8-slim-buster
+FROM python:3.8-buster
 
 WORKDIR /hdtgm-player/
 
 COPY . .
-RUN pip3 install -r requirements.txt
+# apt-get install libxml2-dev libxslt-dev python-dev \
 
+<<<<<<< HEAD
 # ENTRYPOINT ["python", "app.py", "--host=0.0.0.0"]
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+=======
+RUN pip3 install --upgrade pip  \ 
+    && pip3 install -r requirements_minimal.txt \
+    && mkdir ./media/audio_files
+
+# ENTRYPOINT ["python", "main.py", "--host=0.0.0.0"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+>>>>>>> staging
 # CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]

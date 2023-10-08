@@ -49,14 +49,3 @@ function handleUpload(event) {
   
     event.preventDefault();
   }
-
-const getCardData = async (episode_id) => {
-    res = await fetch(`/episode_cards/${episode_id}`);
-    card_str = await res.json()
-}
-
-const redirectInfoPage = () => {
-    let episode_id = episode_selector.value
-    window.location.href = `/episode_cards/${episode_id}`;
-
-}

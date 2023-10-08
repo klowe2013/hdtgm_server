@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <body>
+        <h2> Now it's time for...</h2>
+        <div>
+            <div>
+                <audio controls id="audio_player"></audio>
+            </div>
+            <div id="play-btns-container">
+                <button id="back30" onclick="change_player_time(-30)">-30</button>
+                <button id="back15" onclick="change_player_time(-15)">-15</button>
+                <button id="play">Play/Pause</button>
+                <button id="plus30" onclick="change_player_time(30)">+30</button>
+                <button id="plus60" onclick="change_player_time(60)">+60</button>
+                <button id="download_ep" onclick="download_curr_episode()">Download</button>
+            </div>
+        </div>
+        <h2>How Did This Get Made!</h2>
+        <div class="card-title">
+            <p><b>{{ episode_no }}: {{ imdb_title }}</b></p>
+            <p><b>Starring:</b> {{ cast }}</p>
+            <p><b>Genres:</b> {{ genres }}</p>
+            <p>{{ description }}</p>
+        </div>
+            
+    </body>
+
+    <script src="static/search_funs.js"></script>
+    <script src="static/player_funs.js"></script>
+    <script src="static/info_card.js"></script>
+</html>
+

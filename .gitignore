@@ -1,2 +1,13 @@
 /media/audio_files
+<<<<<<< HEAD
 /hdtgm_server
+=======
+.ipynb_checkpoints/
+/hdtgm_server/
+kafka_test.ipynb
+/keys
+/dockerfiles/data/
+/*.db
+**/__pycache__
+/hdtgm_server_env/
+>>>>>>> staging

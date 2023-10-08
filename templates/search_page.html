@@ -1,8 +1,15 @@
 <!DOCTYPE html>
     <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.min.css"
+        />
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
         <title>{{ title }}</title>
     </head>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
     <body>
         <h2> Now it's time for...</h2>
         <div>
@@ -10,11 +17,17 @@
                 <audio controls id="audio_player"></audio>
             </div>
             <div id="play-btns-container">
-                <button id="back30" onclick="change_player_time(-30)">-30</button>
-                <button id="back15" onclick="change_player_time(-15)">-15</button>
-                <button id="play">Play/Pause</button>
-                <button id="plus30" onclick="change_player_time(30)">+30</button>
-                <button id="plus60" onclick="change_player_time(60)">+60</button>
+                <div class="centerer">
+                    <button id="back30" onclick="change_player_time(-30)">-30</button>
+                    <button id="back15" onclick="change_player_time(-15)">-15</button>
+                    <button id="play">Play/Pause</button>
+                    <button id="plus30" onclick="change_player_time(30)">+30</button>
+                    <button id="plus60" onclick="change_player_time(60)">+60</button>
+                </div>
+                <div class="centerer">
+                    <button id="download_ep" onclick="download_curr_episode()">Download</button>
+                    <button id="episode_info" onclick="redirectInfoPage()">More Info</button>
+                </div>
             </div>
         </div>
         <h2>How Did This Get Made!</h2>
@@ -40,10 +53,22 @@
                 <button id="change_button">Change Episode</button>
             </div>
         </div>
+        <div class="centerer">
+            <form method="post" enctype="multipart/form-data">
+                <div class="centerer">
+                    <label for="file">Choose Episodes</label>
+                </div>
+                <div class="centerer">
+                    <input id="file" name="file" type="file" multiple width="200px" class="centerer"/>
+                </div>
+                <button>Upload</button>
+            </form>
+        </div>
             
     </body>
 
     <script src="static/search_funs.js"></script>
     <script src="static/player_funs.js"></script>
+    <script src="static/info_card.js"></script>
 </html>
 
