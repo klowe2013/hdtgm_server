@@ -41,6 +41,7 @@ change_btn.addEventListener("click", function () {
     current_chunk = 0
     chunkData = []
     chunkLengths = []
+    cumLength = 0
     load_episode(ep_selector.value)
 });
 
@@ -82,7 +83,8 @@ player.addEventListener("timeupdate", function() {
     const endTolerance = .1
     if (player.currentTime >= (player.duration - endTolerance)) {
         console.log(`caught end of chunk within tolerance; loading chunk ${current_chunk}`)
-        chunkLengths.push(player.currentTime)
+        cumLength += player.currentTime
+        chunkLengths.push(cumLength)
         playNextChunk()
     }
 })
