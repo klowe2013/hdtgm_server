@@ -83,7 +83,8 @@ def get_audio_by_id(id, chunk):
     )['FILEPATH'].values[0]
 
     with open(this_file, 'rb') as f:
-        audio_data = base64.b64encode(f.read()).decode('UTF-8')
+        f.seek(int(1e6*chunk))
+        audio_data = base64.b64encode(f.read(int(1e6))).decode('UTF-8')
         print(f'Loaded data from source file in {time.time()-start_time:.2f}s: {audio_data[:100]}')
         
     data = {"snd": audio_data}
