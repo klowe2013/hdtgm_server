@@ -1,26 +1,29 @@
 hello:
 	echo "Hello world"
 
+tmp-test:
+	echo "hello world" \
+	&& echo "hello world line 2"
+
 test-run:
-	./hdtgm_server/bin/python ./app.py
+	./hdtgm_server/bin/python ./main.py
 
 build-app:
-	docker build --tag hdtgm-player .
+	echo "Building HDTGM player (prod)" \
+	&& docker build --tag hdtgm-player . \
+	&& echo "Creating container..." \
+	&& docker run -d -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 80:5000 --name hdtgm-player hdtgm-player 
 
 run-app:
-	docker run -d -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 80:5000 --name hdtgm-player hdtgm-player 
+	docker start hdtgm-player 	
 
-compose-kafka:
-	docker-compose --file ./dockerfiles/docker-compose-kafka.yml up -d
+build-dev:
+	echo "Building HDTGM player (dev)" \
+	&& docker build --tag hdtgm-dev . \
+	&& echo "Creating container..." \
+	&& docker run -d -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 5000:5000 --name hdtgm-dev hdtgm-dev 
 
-compose-cassandra:
-	docker-compose --file ./dockerfiles/docker-compose-cassandra.yml up -d
+run-dev:
+	docker start hdtgm-dev 
 
-kafka-down:
-	docker-compose --file ./dockerfiles/docker-compose-kafka.yml down
-
-cassandra-down:
-	docker-compose --file ./dockerfiles/docker-compose-cassandra.yml down
-
-deploy-gcp:
-	gcloud app deploy 
+	
