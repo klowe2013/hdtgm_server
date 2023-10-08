@@ -31,6 +31,8 @@ let current_episode = ''
 let current_chunk = 0
 let playing_chunk = 0
 let chunkData = []
+let chunkLengths = []
+let cumLength = 0
 const nChunks = 3
 let fullEpisode = ''
 
@@ -38,6 +40,7 @@ change_btn.addEventListener("click", function () {
     console.log('received click for audio buffer')
     current_chunk = 0
     chunkData = []
+    chunkLengths = []
     load_episode(ep_selector.value)
 });
 
@@ -55,10 +58,12 @@ load_episode = async (episode_id) => {
         delay(100)
     }
     current_chunk = nChunks
+    play_btn.innerHTML = 'Pause'
     playNextChunk()
 }
 
 playNextChunk = async () => {
+    const startTolerance = .1
     let playingBuff = chunkData.shift()
     player.src = `${mp3_prefix}${playingBuff}`
     let currentTime = player.currentTime
@@ -66,15 +71,20 @@ playNextChunk = async () => {
     // player.src = `${player.src}${playingBuff}`
     // player.src = `${mp3_prefix}${fullEpisode}`
     // player.currentTime = currentTime
+    player.currentTime = startTolerance
     player.play()
     let thisChunk = await load_audio(current_episode, current_chunk)
     chunkData.push(thisChunk)
     current_chunk += 1
 }
 
-player.addEventListener("ended", function() {
-    console.log(`caught end of audio; loading chunk ${current_chunk}`)
-    playNextChunk()
+player.addEventListener("timeupdate", function() {
+    const endTolerance = .1
+    if (player.currentTime >= (player.duration - endTolerance)) {
+        console.log(`caught end of chunk within tolerance; loading chunk ${current_chunk}`)
+        chunkLengths.push(player.currentTime)
+        playNextChunk()
+    }
 })
 
 

@@ -1,10 +1,6 @@
 hello:
 	echo "Hello world"
 
-tmp-test:
-	echo "hello world" \
-	&& echo "hello world line 2"
-
 test-run:
 	./hdtgm_server/bin/python ./main.py
 
