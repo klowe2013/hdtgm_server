@@ -21,8 +21,8 @@ FILEPATH     TEXT    NOT NULL
 )
 """
 
-EXEC_BASE = './mounted_data'
-# EXEC_BASE = '/hdtgm-player/data'
+# EXEC_BASE = './mounted_data'
+EXEC_BASE = '/hdtgm-player/data'
 
 SQLITE_DB = f'{EXEC_BASE}/hdtgm_database.db'
 EPISODE_INFO = 'episode_info'

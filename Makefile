@@ -10,7 +10,7 @@ build-app:
 	&& echo "Building HDTGM player (prod)" \
 	&& docker build --tag hdtgm-player . \
 	&& echo "Creating container..." \
-	&& docker run -d -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 80:5000 --name hdtgm-player hdtgm-player 
+	&& docker run -d -v "${CURDIR}/mounted_data/":/hdtgm-player/data/ -p 80:5000 --name hdtgm-player hdtgm-player 
 
 run-app:
 	docker start hdtgm-player 	
@@ -19,9 +19,7 @@ build-dev:
 	echo "Building HDTGM player (dev)" \
 	&& docker build --tag hdtgm-dev . \
 	&& echo "Creating container..." \
-	&& docker run -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
+	&& docker run -v "${CURDIR}/mounted_data/":/hdtgm-player/data/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
 
 run-dev:
-	docker run -v "$(PWD)/mounted_data/":/hdtgm-player/data/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
-
-	
+	docker run -v "$(CURDIR)/mounted_data/":/hdtgm-player/data/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
