@@ -37,6 +37,7 @@ let fullEpisode = ''
 change_btn.addEventListener("click", function () {
     console.log('received click for audio buffer')
     current_chunk = 0
+    chunkData = []
     load_episode(ep_selector.value)
 });
 
@@ -74,14 +75,6 @@ playNextChunk = async () => {
 player.addEventListener("ended", function() {
     console.log(`caught end of audio; loading chunk ${current_chunk}`)
     playNextChunk()
-    // load_audio(current_episode, current_chunk).then(
-    //     (res) => {
-    //         let audio_buffer = res
-    //         player.src = `${mp3_prefix}${audio_buffer}`
-    //         current_chunk += 1
-    //         player.play()
-    //     }
-    // )
 })
 
 
