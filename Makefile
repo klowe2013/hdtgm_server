@@ -8,7 +8,7 @@ build-app:
 	docker build --tag hdtgm-player .
 
 run-app:
-	docker run -d -p 80:5000 --name hdtgm-player hdtgm-player 
+	docker run -d -v ./mounted_data/:/hdtgm-player/data/ -p 80:5000 --name hdtgm-player hdtgm-player 
 
 compose-kafka:
 	docker-compose --file ./dockerfiles/docker-compose-kafka.yml up -d

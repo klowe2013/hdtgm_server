@@ -1,6 +1,6 @@
 from flask import Blueprint, request, current_app
 from werkzeug.utils import secure_filename
-from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
+from python.constants import FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA, MEDIA_FOLDER
 from python.EpisodeIngestor import EpisodeIngestor 
 import uuid 
 import os 
@@ -21,18 +21,17 @@ with app.app_context():
 def episode_upload():
     ingestor = EpisodeIngestor()
     logging.info(request.files)
-    upload_folder = './media/audio_files'
     uploaded_files = request.files.getlist('file')
     logging.info(f'received {uploaded_files}')
     for uploaded_file in uploaded_files:
-        uploaded_file.save(os.path.join(upload_folder, uploaded_file.filename))
+        uploaded_file.save(os.path.join(MEDIA_FOLDER, uploaded_file.filename))
 
         # Get title, episode number, ID
         internal_id = str(uuid.uuid4())
         
         id_info = {
             'id': internal_id,
-            'filepath': os.path.join(upload_folder, uploaded_file.filename)
+            'filepath': os.path.join(MEDIA_FOLDER, uploaded_file.filename)
         }
 
         print(f'Entering path info {id_info} to DB')
