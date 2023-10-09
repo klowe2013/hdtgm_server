@@ -22,7 +22,7 @@ build-dev:
 	&& docker run -d -v "${CURDIR}/mounted_data/":/hdtgm-player/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
 
 run-dev:
-	docker run -v "$(CURDIR)/mounted_data/":/hdtgm-player/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
+	docker run -d -v "$(CURDIR)/mounted_data/":/hdtgm-player/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
 
 debug-dev:
 	./hdtgm_server/bin/python ./main.py
