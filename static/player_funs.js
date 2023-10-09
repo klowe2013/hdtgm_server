@@ -14,8 +14,8 @@ function delay(milliseconds){
 load_audio = async (episode_id, chunk_no) => {
     console.log(`Loading episode id ${episode_id}, chunk ${chunk_no}`)
     const res = await fetch(`/audio_by_id/${episode_id}_${chunk_no}`);
-    let {snd: b64buf} = await res.json()
-    return b64buf
+    audioJson = await res.json()
+    return audioJson
 }
 
 check_player_time = () => {
@@ -28,65 +28,122 @@ change_player_time = (delta_seconds) => {
 }
 
 let current_episode = ''
-let current_chunk = 0
-let playing_chunk = 0
-let chunkData = []
-let chunkLengths = []
+let loadChunk = 0
+let playChunk = 0
+let chunkData = [0]
+let chunkLengths = [0]
 let cumLength = 0
 const nChunks = 3
-let fullEpisode = ''
 
 change_btn.addEventListener("click", function () {
     console.log('received click for audio buffer')
-    current_chunk = 0
-    chunkData = []
-    chunkLengths = []
+    loadChunk = 0
+    chunkData = [0]
+    chunkLengths = [0]
+    playChunk = 0
     load_episode(ep_selector.value)
 });
 
+let fullDuration = 0
 load_episode = async (episode_id) => {
     let is_paused = play_btn.paused 
     play_btn.innerHTML = 'Loading...'
     current_episode = episode_id
+    res = await fetch(`/get_episode_length/${episode_id}`)
+    let {full_duration: duration_res} = await res.json()
+    fullDuration = duration_res
+    console.log(`${episode_id} has length ${fullDuration}`)
     player.src = mp3_prefix
     for (i=0; i < nChunks; i++) {
-        let thisChunk = await load_audio(current_episode, current_chunk)
-        chunkData.push(thisChunk)
-        console.log(fullEpisode.length/1000)
-        fullEpisode += thisChunk
-        current_chunk += 1
+        let audioJson = await load_audio(current_episode, loadChunk)
+        chunkData.push(audioJson.snd)
+        chunkLengths.push(audioJson.chunk_len + chunkLengths[chunkLengths.length - 1])
+        loadChunk += 1
         delay(100)
     }
-    current_chunk = nChunks
+    loadChunk = nChunks
     play_btn.innerHTML = 'Pause'
     playNextChunk()
 }
 
 playNextChunk = async () => {
     const startTolerance = .1
-    let playingBuff = chunkData.shift()
+    playChunk += 1
+    let playingBuff = chunkData[playChunk]
     player.src = `${mp3_prefix}${playingBuff}`
-    let currentTime = player.currentTime
-    // player.src += playingBuff
-    // player.src = `${player.src}${playingBuff}`
-    // player.src = `${mp3_prefix}${fullEpisode}`
-    // player.currentTime = currentTime
     player.currentTime = startTolerance
     player.play()
-    let thisChunk = await load_audio(current_episode, current_chunk)
-    chunkData.push(thisChunk)
-    current_chunk += 1
+    if (playChunk > (loadChunk - nChunks)) {
+        let thisChunk = await load_audio(current_episode, loadChunk)
+        chunkData.push(thisChunk)
+        loadChunk += 1
+    }   
 }
 
-player.addEventListener("timeupdate", function() {
+// Update progress bar
+function updateProgress(e) {
     const endTolerance = .1
-    if (player.currentTime >= (player.duration - endTolerance)) {
+    const { duration, currentTime } = e.srcElement;
+    if (currentTime >= (duration - endTolerance)) {
         console.log(`caught end of chunk within tolerance; loading chunk ${current_chunk}`)
         chunkLengths.push(player.currentTime)
         playNextChunk()
+    } else {
+        const progressPercent = ((currentTime + chunkLengths[playChunk-1]) / fullDuration) * 100;
+        progress.style.width = `${progressPercent}%`;
     }
-})
+}
 
+// Set progress bar
+const progress = document.getElementById('progress');
+const progressContainer = document.getElementById('progress-container');
+async function setProgress(e) {
+    const width = this.clientWidth;
+    const clickX = e.offsetX;
+    const duration = player.duration;
+
+    let desired_time = (clickX / width) * fullDuration
+
+    console.log(`would set time to ${desired_time}`)
+
+    const params = {'target_time': desired_time}
+    const options = {
+        'method': 'POST',
+        'body': JSON.stringify(params),
+        'headers': {'content-type': 'application/json'}
+    }
+    chunkRes = await fetch(`/find_chunk/${current_episode}`, options)
+    chunkJson = await chunkRes.json()
+    let myChunk = chunkJson.search_chunk
+
+    if (myChunk >= loadChunk) {
+        // Loop and load chunks to get to myChunk
+        const startChunk = loadChunk
+        for (i=startChunk; i <= myChunk; i++) {
+            console.log(`Catching up to chunk ${myChunk} to get to ${desired_time}: currently at ${loadChunk} (${chunkLengths[chunkLengths.length - 1]})`)
+            let audioJson = await load_audio(current_episode, loadChunk)
+            chunkData.push(audioJson.snd)
+            chunkLengths.push(audioJson.chunk_len + chunkLengths[chunkLengths.length - 1])
+            loadChunk += 1
+            delay(100)
+        }
+    }
+
+    playChunk = myChunk 
+    chunkStart = chunkLengths[playChunk-1]
+    chunkTime = desired_time - chunkStart
+    let playingBuff = chunkData[playChunk]
+    player.src = `${mp3_prefix}${playingBuff}`
+    player.currentTime = chunkTime
+    player.play()
+
+}
+  
+  
+player.addEventListener("timeupdate", updateProgress)
+
+// Click on progress bar
+progressContainer.addEventListener('click', setProgress);
 
 play_btn.addEventListener("click", function () {
     if (player.paused) {
