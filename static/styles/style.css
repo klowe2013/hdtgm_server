@@ -96,3 +96,20 @@ audio {
   margin: 5px;
   background-color: rgb(217, 220, 219);
 }
+
+.progress-container {
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 10px 0;
+  height: 20px;
+  width: 100%;
+}
+
+.progress {
+  background-color: #13a8ab;
+  border-radius: 10px;
+  height: 100%;
+  width: 0%;
+  transition: width 0.1s linear;
+}
