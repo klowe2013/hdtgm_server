@@ -39,10 +39,11 @@ def episode_upload():
         # Upload the file
         print(f'Uploading {filename} to blob')
         try:
-	    blob.upload_from_filename(os.path.join(MEDIA_FOLDER, filename))
+            blob.upload_from_filename(os.path.join(MEDIA_FOLDER, filename))
         except BaseException as e:
-	    print(f"Couldn't upload file: {e}")
-	# Remove from local
+            print(f"Couldn't upload file: {e}")
+        
+        # Remove from local
         print('cleaning locally')
         os.remove(os.path.join(MEDIA_FOLDER, filename))
         
