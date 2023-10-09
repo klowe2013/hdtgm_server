@@ -1,5 +1,6 @@
-from flask import Blueprint, current_app, Response 
+from flask import Blueprint, current_app, Response, send_file, render_template, request 
 from python.constants import FILE_PATH_TABLE, EPISODE_INFO, GCLOUD_PREFIX
+from python.EpisodeCard import EpisodeCard
 import json 
 import time 
 import base64 
@@ -53,10 +54,10 @@ def audio_stream(id):
                 n_reads += 1 
     return Response(generate(), mimetype='audio/mp3')
     
-@id_bp.route('/audio_by_id/<string:id>')
-def get_audio_by_id(id):
-    
-    print(f'pulling audio for id {id}')
+@id_bp.route('/audio_by_id/<string:id>_<int:chunk>')
+def get_audio_by_id(id, chunk):
+
+    print(f'pulling audio for id {id}, chunk {chunk}')
     # Default to pull from Redis cache
     start_time = time.time()
     
@@ -71,11 +72,19 @@ def get_audio_by_id(id):
     print(f'Reading "{this_file}" from GCP')
     audio_blob = bucket.blob(this_file)
     with audio_blob.open('rb') as f:
-        audio_data = base64.b64encode(f.read()).decode('UTF-8')
-        print(f'Loaded data from source file in {time.time()-start_time:.2f}s')
+        f.seek(int(2e6*chunk))
+        audio_data = base64.b64encode(f.read(int(2e6))).decode('UTF-8')
 
     data = {"snd": audio_data}
     res = app.response_class(response=json.dumps(data),
         status=200,
         mimetype='application/json')
     return res
+
+@id_bp.route('/episode_cards/<string:id>')
+def get_episode_card(id):
+    
+    data = EpisodeCard(id, database=database).get_card_info()
+    
+    return render_template('episode_info.html', **data)
+

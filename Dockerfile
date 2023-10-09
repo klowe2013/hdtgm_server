@@ -7,8 +7,8 @@ COPY . .
 # apt-get install libxml2-dev libxslt-dev python-dev \
 
 RUN pip3 install --upgrade pip  \ 
-    && pip3 install -r requirements_minimal.txt \
-    && mkdir ./media/audio_files
+    && pip3 install -r requirements.txt \
+    && mkdir -p ./media/audio_files
 
 # ENTRYPOINT ["python", "main.py", "--host=0.0.0.0"]
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]

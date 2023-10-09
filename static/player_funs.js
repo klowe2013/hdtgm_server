@@ -11,17 +11,11 @@ function delay(milliseconds){
     });
 }
 
-load_audio = async (episode_id) => {
-    let n_chunks = 1 // Eventually replace with some lookup logic from database
-    let full_audio = ""
-    console.log(`Loading episode id ${episode_id}`)
-    for (i=0; i < n_chunks; i++){
-        const res = await fetch(`/audio_by_id/${episode_id}`);
-        let {snd: b64buf} = await res.json();
-        full_audio = full_audio + b64buf
-        await delay(50)
-    }
-    return full_audio
+load_audio = async (episode_id, chunk_no) => {
+    console.log(`Loading episode id ${episode_id}, chunk ${chunk_no}`)
+    const res = await fetch(`/audio_by_id/${episode_id}_${chunk_no}`);
+    let {snd: b64buf} = await res.json()
+    return b64buf
 }
 
 check_player_time = () => {
@@ -33,33 +27,68 @@ change_player_time = (delta_seconds) => {
     player.currentTime += delta_seconds
 }
 
-update_audio = (episode_id) => {
-    console.log('entering update_audio')
-    let is_paused = play_btn.paused 
-    play_btn.innerHTML = 'Loading...'
-    
-    load_audio(episode_id).then(
-        (res) => {
-            let audio_buffer = res
-            player.src = `${mp3_prefix}${audio_buffer}`
-            if (is_paused) {
-                play_btn.innerHTML = 'Play'
-            } else {
-                play_btn.innerHTML = 'Pause'
-                player.play()
-            }
-        }
-    )    
-}
-// update_audio = (episode_id) => {
-//     console.log('entering update_audio')
-//     player.src = `/stream_by_id/${episode_id}`
-// }
+let current_episode = ''
+let current_chunk = 0
+let playing_chunk = 0
+let chunkData = []
+let chunkLengths = []
+let cumLength = 0
+const nChunks = 3
+let fullEpisode = ''
 
 change_btn.addEventListener("click", function () {
     console.log('received click for audio buffer')
-    update_audio(ep_selector.value)
+    current_chunk = 0
+    chunkData = []
+    chunkLengths = []
+    cumLength = 0
+    load_episode(ep_selector.value)
 });
+
+load_episode = async (episode_id) => {
+    let is_paused = play_btn.paused 
+    play_btn.innerHTML = 'Loading...'
+    current_episode = episode_id
+    player.src = mp3_prefix
+    for (i=0; i < nChunks; i++) {
+        let thisChunk = await load_audio(current_episode, current_chunk)
+        chunkData.push(thisChunk)
+        console.log(fullEpisode.length/1000)
+        fullEpisode += thisChunk
+        current_chunk += 1
+        delay(100)
+    }
+    current_chunk = nChunks
+    play_btn.innerHTML = 'Pause'
+    playNextChunk()
+}
+
+playNextChunk = async () => {
+    const startTolerance = .1
+    let playingBuff = chunkData.shift()
+    player.src = `${mp3_prefix}${playingBuff}`
+    let currentTime = player.currentTime
+    // player.src += playingBuff
+    // player.src = `${player.src}${playingBuff}`
+    // player.src = `${mp3_prefix}${fullEpisode}`
+    // player.currentTime = currentTime
+    player.currentTime = startTolerance
+    player.play()
+    let thisChunk = await load_audio(current_episode, current_chunk)
+    chunkData.push(thisChunk)
+    current_chunk += 1
+}
+
+player.addEventListener("timeupdate", function() {
+    const endTolerance = .1
+    if (player.currentTime >= (player.duration - endTolerance)) {
+        console.log(`caught end of chunk within tolerance; loading chunk ${current_chunk}`)
+        cumLength += player.currentTime
+        chunkLengths.push(cumLength)
+        playNextChunk()
+    }
+})
+
 
 play_btn.addEventListener("click", function () {
     if (player.paused) {

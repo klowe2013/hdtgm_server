@@ -5,6 +5,12 @@ import uuid
 import json 
 from python.db_interfaces.DatabaseFactory import DatabaseFactory 
 from python.constants import SQLITE_EPISODE_SCHEMA, SQLITE_DB, EPISODE_INFO
+import logging
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
+logger = logging.getLogger("episode_ingestion")
+
 
 class EpisodeIngestor:
     media_dir = './media/audio_files/'
@@ -87,25 +93,36 @@ class EpisodeIngestor:
         title = self.parse_title(episode_name)
         episode_no = self.get_episode_no(episode_name)
 
-        print(f'parsed episode {episode_name} into episode #{episode_no}: {title}')
+        logging.info(f'parsed episode {episode_name} into episode #{episode_no}: {title}')
 
         # Get IMDB Info
-        imdb_info = self._search_title(self.imdb, title)
-        print(imdb_info)
+        try:
+            imdb_info = self._search_title(self.imdb, title)
+            logging.info(imdb_info)
+        except BaseException as e:
+            imdb_info = {}
+            logging.info(f"Failed to find {title} on IMDB: {e}")
 
         all_info = {
             'id': internal_id,
             'filename': episode_name,
             'title': title,
-            'episode_no': episode_no
+            'episode_no': episode_no,
+            'imdb_title': '',
+            'genres': '',
+            'description': '',
+            'rating': -1,
+            'year': 0000,
+            'cast': ''
         }
 
         # Add IMDB Info
         for k, v in imdb_info.items():
-            all_info[k] = v
-        all_info['genres'] = ', '.join(imdb_info['genres'])
-        all_info['cast'] = ', '.join(imdb_info['cast'])
-
+            if k in ['genres', 'cast']:
+                all_info[k] = ', '.join(v)
+            else:
+                all_info[k] = v
+        
         # Write audio data to DB
         # TODO: Move the initialization to an init script
         if initialize:
