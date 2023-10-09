@@ -75,13 +75,15 @@ def get_audio_by_id(id, chunk):
     start_time = time.time()
     
     # Get path to file
-    this_file = database.query(
+    this_file_name = database.query(
         f"""
-        select FILEPATH from {FILE_PATH_TABLE} 
+        select FILENAME from {EPISODE_INFO} 
         where id=='{id}'
         """
-    )['FILEPATH'].values[0]
+    )['FILENAME'].values[0]
 
+    this_file = f"/hdtgm-player/data/media/audio_files/{this_file}"
+    
     with open(this_file, 'rb') as f:
         f.seek(int(2e6*chunk))
         audio_data = base64.b64encode(f.read(int(2e6))).decode('UTF-8')
