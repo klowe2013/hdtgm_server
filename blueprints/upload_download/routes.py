@@ -38,8 +38,11 @@ def episode_upload():
         blob = bucket.blob(os.path.join(GCLOUD_PREFIX, filename))
         # Upload the file
         print(f'Uploading {filename} to blob')
-        blob.upload_from_filename(os.path.join(MEDIA_FOLDER, filename))
-        # Remove from local
+        try:
+	    blob.upload_from_filename(os.path.join(MEDIA_FOLDER, filename))
+        except BaseException as e:
+	    print(f"Couldn't upload file: {e}")
+	# Remove from local
         print('cleaning locally')
         os.remove(os.path.join(MEDIA_FOLDER, filename))
         
