@@ -26,3 +26,4 @@ EPISODE_INFO = 'episode_info'
 FILE_PATH_TABLE = 'episode_paths'
 
 GCLOUD_PREFIX = 'hdtgm-episodes'
+MEDIA_FOLDER = './data/media/audio_files'

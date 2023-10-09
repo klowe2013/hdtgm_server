@@ -6,4 +6,3 @@ kafka_test.ipynb
 /dockerfiles/data/
 /*.db
 **/__pycache__
-/hdtgm_server_env/
