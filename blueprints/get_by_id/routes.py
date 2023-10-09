@@ -82,7 +82,7 @@ def get_audio_by_id(id, chunk):
         """
     )['FILENAME'].values[0]
 
-    this_file = f"/hdtgm-player/data/media/audio_files/{this_file}"
+    this_file = f"/hdtgm-player/data/media/audio_files/{this_file_name}"
     
     with open(this_file, 'rb') as f:
         f.seek(int(2e6*chunk))
