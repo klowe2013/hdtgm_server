@@ -1,8 +1,8 @@
 hello:
 	echo "Hello world"
 
-test-run:
-	./hdtgm_server/bin/python ./main.py
+local-run:
+	gunicorn --bind 0.0.0.0:80 main:app
 
 build-app:
 	echo "Cleaning up old container" \
