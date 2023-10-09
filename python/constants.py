@@ -21,11 +21,9 @@ FILEPATH     TEXT    NOT NULL
 )
 """
 
-# EXEC_BASE = './mounted_data'
-EXEC_BASE = '/hdtgm-player/data'
-
-SQLITE_DB = f'{EXEC_BASE}/hdtgm_database.db'
+SQLITE_DB = '/hdtgm-player/data/hdtgm_database.db'
 EPISODE_INFO = 'episode_info'
 FILE_PATH_TABLE = 'episode_paths'
 
-MEDIA_FOLDER = f'{EXEC_BASE}/media/audio_files'
+MEDIA_FOLDER = '/hdtgm-player/data/media/audio_files'
+    
