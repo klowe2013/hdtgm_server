@@ -19,10 +19,10 @@ build-dev:
 	echo "Building HDTGM player (dev)" \
 	&& docker build --tag hdtgm-dev . \
 	&& echo "Creating container..." \
-	&& docker run -d -v "${CURDIR}/mounted_data/":/hdtgm-player/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
+	&& docker run -d -v "${CURDIR}/mounted_data/":/hdtgm-player/ -p 5000:5000 --name hdtgm-dev hdtgm-dev 
 
 run-dev:
-	docker run -d -v "$(CURDIR)/mounted_data/":/hdtgm-player/ -p 5000:5000 --rm --name hdtgm-dev hdtgm-dev 
+	docker run -d -v "$(CURDIR)/mounted_data/":/hdtgm-player/ -p 5000:5000 --name hdtgm-dev hdtgm-dev 
 
 debug-dev:
 	./hdtgm_server/bin/python ./main.py
