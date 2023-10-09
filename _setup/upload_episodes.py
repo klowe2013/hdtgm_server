@@ -16,7 +16,7 @@ CLEANUP_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/_setup/a
 def copy_sample_episodes():
     base_dir = '/Users/kaleb/Documents/HDTGM Episodes/'
     all_files = glob.glob(base_dir+'*')
-    n_to_transfer = min(5, len(all_files))
+    n_to_transfer = min(6, len(all_files))
     n_transferred = 0
     for i in range(n_to_transfer):
         logging.info(f"Moving {all_files[i]}")
@@ -43,7 +43,7 @@ def upload_new_episodes():
         logging.info(f'Posting {f}')
         # res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
         post_files = [('file', open(os.path.join(UPLOAD_QUEUE, f),'rb'))]
-        res = requests.post('http://192.168.132.12/episode_upload', files=post_files)
+        res = requests.post('http://192.168.132.12:5000/episode_upload', files=post_files)
         if res.status_code == 200:
             episodes_transferred += 1
             shutil.move(os.path.join(UPLOAD_QUEUE, f), os.path.join(CLEANUP_DIR, f))
