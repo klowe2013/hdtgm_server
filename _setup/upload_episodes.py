@@ -45,7 +45,7 @@ def upload_new_episodes():
         logging.info(f'Posting {f}')
         # res = requests.post('http://192.168.132.58:5000/episode_upload', files=post_files)
         post_files = [('file', open(os.path.join(UPLOAD_QUEUE, f),'rb'))]
-        res = requests.post('http://192.168.132.12:5000/episode_upload', files=post_files)
+        res = requests.post('http://192.168.132.12/episode_upload', files=post_files)
         if res.status_code == 200:
             episodes_transferred += 1
             shutil.move(os.path.join(UPLOAD_QUEUE, f), os.path.join(CLEANUP_DIR, f))
