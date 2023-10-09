@@ -10,7 +10,7 @@ build-app:
 	&& echo "Building HDTGM player (prod)" \
 	&& docker build --tag hdtgm-player . \
 	&& echo "Creating container..." \
-	&& docker run -d -v "${CURDIR}/mounted_data/":/hdtgm-player/ -p 80:5000 --name hdtgm-player hdtgm-player 
+	&& docker run -d -p 80:5000 --name hdtgm-player hdtgm-player 
 
 run-app:
 	docker start hdtgm-player 	
