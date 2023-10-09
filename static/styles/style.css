@@ -108,7 +108,7 @@ audio {
 
 .progress {
   background-color: #13a8ab;
-  border-radius: 5px;
+  border-radius: 10px;
   height: 100%;
   width: 0%;
   transition: width 0.1s linear;
