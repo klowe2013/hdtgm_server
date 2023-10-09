@@ -14,7 +14,10 @@
         <h2> Now it's time for...</h2>
         <div>
             <div>
-                <audio controls id="audio_player"></audio>
+                <audio id="audio_player"></audio>
+            </div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress" id="progress"></div>
             </div>
             <div id="play-btns-container">
                 <div class="centerer">
@@ -24,6 +27,7 @@
                     <button id="plus30" onclick="change_player_time(30)">+30</button>
                     <button id="plus60" onclick="change_player_time(60)">+60</button>
                 </div>
+                <br>
                 <div class="centerer">
                     <button id="download_ep" onclick="download_curr_episode()">Download</button>
                     <button id="episode_info" onclick="redirectInfoPage()">More Info</button>

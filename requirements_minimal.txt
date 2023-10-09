@@ -9,6 +9,7 @@ google-crc32c==1.5.0
 google-resumable-media==2.6.0
 googleapis-common-protos==1.60.0
 gunicorn==21.2.0
+mutagen==1.47.0
 numpy==1.24.4
 pandas==2.0.3
 redis==5.0.0

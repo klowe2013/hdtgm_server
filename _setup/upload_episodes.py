@@ -6,6 +6,8 @@ import requests
 
 # app_host = os.getenv('HOST', 'localhost:5000')
 
+BATCH_SIZE = 1
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
 logger = logging.getLogger("episode_uploading")
@@ -16,7 +18,7 @@ CLEANUP_DIR = '/Users/kaleb/Documents/gitRepos/Projects/Hdtgm_webserver/_setup/a
 def copy_sample_episodes():
     base_dir = '/Users/kaleb/Documents/HDTGM Episodes/'
     all_files = glob.glob(base_dir+'*')
-    n_to_transfer = min(5, len(all_files))
+    n_to_transfer = min(BATCH_SIZE, len(all_files))
     n_transferred = 0
     for i in range(n_to_transfer):
         logging.info(f"Moving {all_files[i]}")
