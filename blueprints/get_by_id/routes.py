@@ -117,14 +117,20 @@ def find_chunk(id):
     next_chunk = 1
     curr_len = 0
     cum_len = 0
-    while cum_len < target_time:
+    reading = False 
+    while cum_len < target_time and reading:
         with open(this_file, 'rb') as f:
-            f.seek(int(2e6*(next_chunk-1)))
-            x = MP3(BytesIO(f.read(int(2e6))))
-            curr_len = x.info.length
-            cum_len += curr_len
-            next_chunk += 1
-            print(f'on chunk {next_chunk}, cumulative length is {cum_len / 60}')
+            f.seek(int(N_MIL_BITS*1e6*(next_chunk-1)))
+            my_bytes = f.read(int(N_MIL_BITS*1e6))
+            if my_bytes != b"":
+                x = MP3(BytesIO(my_bytes))
+                curr_len = x.info.length
+                cum_len += curr_len
+                next_chunk += 1
+                print(f'on chunk {next_chunk-1}, cumulative length is {cum_len / 60}')
+            else:
+                print(f"Couldn't find chunk {next_chunk}")
+                reading=False 
     print(f"Hit {target_time / 60} minutes with chunk {next_chunk}, length {curr_len / 60}")
     res = app.response_class(response=json.dumps({'search_chunk': next_chunk}),
         status=200,
