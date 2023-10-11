@@ -98,6 +98,7 @@ change_player_time = async (delta_seconds) => {
         // If we're in the right chunk, no problem
         player.currentTime += delta_seconds
     } else {
+        player.pause()
         // If not, we have to find the right chunk and load it
         const params = {'target_time': desiredTime}
         const options = {
