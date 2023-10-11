@@ -7,6 +7,8 @@ import base64
 from io import BytesIO
 from mutagen .mp3 import MP3
 
+N_MIL_BITS = 3
+
 app = current_app
 with app.app_context():
     database = current_app.config['database']
@@ -80,8 +82,8 @@ def get_audio_by_id(id, chunk):
     this_file = f"./data/media/audio_files/{this_file_name}"
     
     with open(this_file, 'rb') as f:
-        f.seek(int(2e6*chunk))
-        chunk_read = f.read(int(2e6))
+        f.seek(int(N_MIL_BITS*1e6*(chunk-1)))
+        chunk_read = f.read(int(N_MIL_BITS*1e6))
         audio_data = base64.b64encode(chunk_read).decode('UTF-8')
         chunk_len = MP3(BytesIO(chunk_read)).info.length
         print(f'Loaded chunk {chunk} of duration {chunk_len}')
@@ -115,16 +117,22 @@ def find_chunk(id):
     next_chunk = 1
     curr_len = 0
     cum_len = 0
-    while cum_len < target_time:
+    reading = True 
+    while cum_len < target_time and reading:
         with open(this_file, 'rb') as f:
-            f.seek(int(2e6*(next_chunk-1)))
-            x = MP3(BytesIO(f.read(int(2e6))))
-            curr_len = x.info.length
-            cum_len += curr_len
-            next_chunk += 1
-            print(f'on chunk {next_chunk}, cumulative length is {cum_len / 60}')
+            f.seek(int(N_MIL_BITS*1e6*(next_chunk-1)))
+            my_bytes = f.read(int(N_MIL_BITS*1e6))
+            if my_bytes != b"":
+                x = MP3(BytesIO(my_bytes))
+                curr_len = x.info.length
+                cum_len += curr_len
+                next_chunk += 1
+                print(f'on chunk {next_chunk-1}, cumulative length is {cum_len / 60}')
+            else:
+                print(f"Couldn't find chunk {next_chunk}")
+                reading=False 
     print(f"Hit {target_time / 60} minutes with chunk {next_chunk}, length {curr_len / 60}")
-    res = app.response_class(response=json.dumps({'search_chunk': next_chunk}),
+    res = app.response_class(response=json.dumps({'search_chunk': next_chunk, 'prev_chunk_time': cum_len - curr_len}),
         status=200,
         mimetype='application/json')
     return res

@@ -8,8 +8,6 @@ import os
 from python.db_interfaces.DatabaseFactory import DatabaseFactory
 from python.constants import SQLITE_DB, EPISODE_INFO, FILE_PATH_TABLE, SQLITE_FILEPATH_SCHEMA
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './keys/hdtgm-player-3967c005aeb0.json'
-
 app = Flask(__name__)
 
 database = DatabaseFactory(SQLITE_DB).create('sqlite')
