@@ -117,7 +117,7 @@ def find_chunk(id):
     next_chunk = 1
     curr_len = 0
     cum_len = 0
-    reading = False 
+    reading = True 
     while cum_len < target_time and reading:
         with open(this_file, 'rb') as f:
             f.seek(int(N_MIL_BITS*1e6*(next_chunk-1)))
@@ -132,7 +132,7 @@ def find_chunk(id):
                 print(f"Couldn't find chunk {next_chunk}")
                 reading=False 
     print(f"Hit {target_time / 60} minutes with chunk {next_chunk}, length {curr_len / 60}")
-    res = app.response_class(response=json.dumps({'search_chunk': next_chunk}),
+    res = app.response_class(response=json.dumps({'search_chunk': next_chunk, 'prev_chunk_time': cum_len - curr_len}),
         status=200,
         mimetype='application/json')
     return res
