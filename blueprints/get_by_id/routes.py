@@ -7,6 +7,8 @@ import base64
 from io import BytesIO
 from mutagen .mp3 import MP3
 
+N_MIL_BITS = 3
+
 app = current_app
 with app.app_context():
     database = current_app.config['database']
@@ -80,8 +82,8 @@ def get_audio_by_id(id, chunk):
     this_file = f"./data/media/audio_files/{this_file_name}"
     
     with open(this_file, 'rb') as f:
-        f.seek(int(2e6*(chunk-1)))
-        chunk_read = f.read(int(3e6))
+        f.seek(int(N_MIL_BITS*1e6*(chunk-1)))
+        chunk_read = f.read(int(N_MIL_BITS*1e6))
         audio_data = base64.b64encode(chunk_read).decode('UTF-8')
         chunk_len = MP3(BytesIO(chunk_read)).info.length
         print(f'Loaded chunk {chunk} of duration {chunk_len}')
