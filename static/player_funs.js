@@ -108,21 +108,37 @@ change_player_time = async (delta_seconds) => {
         chunkRes = await fetch(`/find_chunk/${current_episode}`, options)
         chunkJson = await chunkRes.json()
         let myChunk = chunkJson.search_chunk
-    
-        if (myChunk >= loadChunk) {
-            // Loop and load chunks to get to myChunk
-            const startChunk = loadChunk
-            for (i=startChunk; i <= myChunk; i++) {
-                let audioJson = await load_audio(current_episode, loadChunk)
-                chunkMap.set(loadChunk, audioJson.snd)
-                console.log(`setting chunk length for ${loadChunk} to ${audioJson.chunk_len + chunkLengths.get(loadChunk-1)}`)
-                chunkLengths.set(loadChunk, audioJson.chunk_len + chunkLengths.get(loadChunk-1))
-                loadChunk += 1
-                delay(100)
-            }
+        let prevLen = chunkJson.prev_chunk_time
+        console.log(`Found chunk: prev time was ${prevLen} for chunk ${myChunk}`)
+
+        loadChunk = myChunk-1
+        if (!chunkLengths.has(loadChunk)) {
+            chunkLengths.set(loadChunk, prevLen)
         }
+        for (i=0; i < nChunks; i++) {
+            loadChunk += 1
+            let audioJson = await load_audio(current_episode, loadChunk)
+            chunkMap.set(loadChunk, audioJson.snd)
+            chunkLengths.set(loadChunk, audioJson.chunk_len + chunkLengths.get(loadChunk-1))
+            delay(100)
+        }
+
+    
+        // if (myChunk >= loadChunk) {
+        //     // Loop and load chunks to get to myChunk
+        //     const startChunk = loadChunk
+        //     for (i=startChunk; i <= myChunk; i++) {
+        //         let audioJson = await load_audio(current_episode, loadChunk)
+        //         chunkMap.set(loadChunk, audioJson.snd)
+        //         console.log(`setting chunk length for ${loadChunk} to ${audioJson.chunk_len + chunkLengths.get(loadChunk-1)}`)
+        //         chunkLengths.set(loadChunk, audioJson.chunk_len + chunkLengths.get(loadChunk-1))
+        //         loadChunk += 1
+        //         delay(100)
+        //     }
+        // }
+        console.log(chunkLengths)
         let origChunk = playChunk
-        playChunk = myChunk - 1
+        playChunk = myChunk //- 1
         chunkStart = chunkLengths.get(playChunk-1)
         chunkTime = desiredTime - chunkStart
         console.log(`Setting global time to ${desiredTime}, which is ${relativeTime} relative to chunk ${origChunk} and ${chunkTime} into chunk ${myChunk} which starts at ${chunkStart}`)
