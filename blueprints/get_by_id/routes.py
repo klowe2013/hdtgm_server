@@ -86,6 +86,10 @@ def get_audio_by_id(id, chunk):
         chunk_read = f.read(int(N_MIL_BITS*1e6))
         audio_data = base64.b64encode(chunk_read).decode('UTF-8')
         chunk_len = MP3(BytesIO(chunk_read)).info.length
+        if chunk_len > 600:
+            myBytes = f.read(4*(2**20))
+            chunk_len = MP3(BytesIO(myBytes)).info.length
+        
         print(f'Loaded chunk {chunk} of duration {chunk_len}')
         
     data = {"snd": audio_data, "chunk_len": chunk_len}
@@ -125,6 +129,9 @@ def find_chunk(id):
             if my_bytes != b"":
                 x = MP3(BytesIO(my_bytes))
                 curr_len = x.info.length
+                if curr_len > 600:
+                    myBytes = f.read(4*(2**20))
+                    curr_len = MP3(BytesIO(myBytes)).info.length
                 cum_len += curr_len
                 next_chunk += 1
                 print(f'on chunk {next_chunk-1}, cumulative length is {cum_len / 60}')

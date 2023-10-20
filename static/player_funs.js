@@ -80,7 +80,7 @@ function updateProgress(e) {
     if (currentTime >= (duration - endTolerance)) {
         console.log(`caught end of chunk within tolerance; loading chunk ${loadChunk}`)
         // cumLength += player.currentTime
-        chunkLengths.set(playChunk, globalTime)
+        // chunkLengths.set(playChunk, globalTime)
         playNextChunk()
     } else {
         globalTime = currentTime + chunkLengths.get(playChunk-1)
@@ -94,9 +94,11 @@ change_player_time = async (delta_seconds) => {
     let relativeTime = player.currentTime + delta_seconds
     let desiredTime = globalTime + delta_seconds
     
-    if (relativeTime > 0 && relativeTime < player.duration) {
+    thisChunkLen = (chunkLengths.get(playChunk)-chunkLengths.get(playChunk-1))
+    if (relativeTime > 0 && relativeTime < thisChunkLen) {
         // If we're in the right chunk, no problem
         player.currentTime += delta_seconds
+        console.log(`No chunk to change because ${relativeTime} is less than duration ${thisChunkLen}`)
     } else {
         player.pause()
         // If not, we have to find the right chunk and load it
